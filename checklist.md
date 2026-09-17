@@ -21,6 +21,7 @@ Run `node scripts/check.mjs <file.html>` first. It measures the things below tha
 1. **The skim read.** Turn on skim mode. Read what is left, top to bottom. Does it tell the whole story? If a chapter goes blank in skim mode, it has no visual and no remember line; fix it.
 2. **The phone read.** Open at 390 px wide. No horizontal scroll. Diagram text still readable (zoom in if you must, but it should not be needed). The rail chips scroll sideways. Decision options stack.
 3. **The dark read.** Toggle dark. Every diagram still visible. No white boxes. Yellow memory surfaces still read as yellow.
+4. **The one-at-a-time read.** Turn on "One chapter at a time" and step through with Next. Every chapter must make sense alone, because in this mode the reader sees nothing else.
 
 ## Delivery
 

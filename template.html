@@ -96,7 +96,7 @@ h1 { font-size: clamp(1.75rem, 1.1rem + 2.6vw, var(--size-4)); font-weight: 700;
 h2 { font-size: clamp(1.45rem, 1rem + 1.8vw, var(--size-3)); }
 h3 { font-size: var(--size-2); }
 h4 { font-size: var(--size-1); }
-p, ul, ol { margin: 0 0 1em; max-width: var(--measure); }
+p, ul, ol { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; hyphens: manual; }
 li { margin-bottom: .35em; }
 li::marker { color: var(--ink-faint); }
 a { color: var(--here); text-decoration-thickness: 1.5px; text-underline-offset: .18em; }
@@ -325,6 +325,18 @@ body[data-skim="on"] .chapter .figure,
 body[data-skim="on"] .chapter .remember { display: flex; }
 body[data-skim="on"] .chapter .figure { display: block; }
 
+/* ---------- 12b. Focus mode: one chapter at a time, reader paced ---------- */
+body[data-focus="on"] .map,
+body[data-focus="on"] .chapter:not([data-active]),
+body[data-focus="on"] .recap:not([data-active]),
+body[data-focus="on"] .ask:not([data-active]) { display: none; }
+.focus-nav { display: none; justify-content: space-between; align-items: center; gap: 1rem; margin: 0 0 2rem; }
+body[data-focus="on"] .focus-nav { display: flex; }
+.focus-nav button { padding: .7rem 1.2rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; }
+.focus-nav button[data-next] { background: var(--here); color: #fff; }
+.focus-nav button:disabled { opacity: .4; cursor: default; }
+.focus-nav .where { color: var(--ink-soft); font-size: var(--size-s); }
+
 /* ---------- 13. Print ---------- */
 @media print {
   :root { --paper: #fff; --card: #fff; }
@@ -354,11 +366,14 @@ body[data-skim="on"] .chapter .figure { display: block; }
     </ol>
     <div class="tools">
       <button type="button" data-skim aria-pressed="false">Skim mode</button>
+      <button type="button" data-focus aria-pressed="false">One chapter at a time</button>
       <button type="button" data-theme-toggle>Dark / light</button>
     </div>
   </nav>
 
   <main id="main">
+    <!-- FOCUS NAV: only visible in one-chapter-at-a-time mode. Leave as is. -->
+    <div class="focus-nav" aria-live="polite"><button type="button" data-prev>Previous</button><span class="where"></span><button type="button" data-next>Next</button></div>
     <!-- OPENING: the answer before anything else. -->
     <p class="kicker">What this page is for, in a few words</p>
     <h1>Topic name here</h1>
@@ -486,6 +501,38 @@ body[data-skim="on"] .chapter .figure { display: block; }
     var on = body.getAttribute('data-skim') !== 'on';
     body.setAttribute('data-skim', on ? 'on' : 'off'); sk.setAttribute('aria-pressed', String(on));
   });
+
+  /* focus mode: one chapter at a time, reader paced */
+  var fb = d.querySelector('[data-focus]');
+  var parts = [].slice.call(d.querySelectorAll('.chapter, .recap, .ask'));
+  var nav = d.querySelector('.focus-nav'), idx = 0;
+  function showPart(i) {
+    idx = Math.max(0, Math.min(parts.length - 1, i));
+    parts.forEach(function (p, n) { if (n === idx) p.setAttribute('data-active', ''); else p.removeAttribute('data-active'); });
+    if (nav) {
+      nav.querySelector('[data-prev]').disabled = idx === 0;
+      nav.querySelector('[data-next]').disabled = idx === parts.length - 1;
+      var h = parts[idx].querySelector('h2'); nav.querySelector('.where').textContent = (idx + 1) + ' of ' + parts.length + (h ? ': ' + h.textContent : '');
+    }
+    if (body.getAttribute('data-focus') === 'on') { var top = nav ? nav.getBoundingClientRect().top + scrollY - 8 : 0; scrollTo(0, top); }
+  }
+  if (fb && parts.length) {
+    fb.addEventListener('click', function () {
+      var on = body.getAttribute('data-focus') !== 'on';
+      body.setAttribute('data-focus', on ? 'on' : 'off'); fb.setAttribute('aria-pressed', String(on));
+      if (on) { var cur = parts.findIndex(function (p) { return p.getBoundingClientRect().bottom > 120; }); showPart(cur < 0 ? 0 : cur); }
+    });
+    if (nav) {
+      nav.querySelector('[data-prev]').addEventListener('click', function () { showPart(idx - 1); });
+      nav.querySelector('[data-next]').addEventListener('click', function () { showPart(idx + 1); });
+    }
+    d.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.rail a[href^="#"], .map a[href^="#"]');
+      if (!a || body.getAttribute('data-focus') !== 'on') return;
+      var t = d.getElementById(a.getAttribute('href').slice(1)); var n = parts.indexOf(t);
+      if (n >= 0) { e.preventDefault(); showPart(n); }
+    });
+  }
 
   /* progress bar */
   var bar = d.querySelector('.progress');

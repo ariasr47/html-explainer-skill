@@ -24,12 +24,13 @@ Reach for CSS components first. Write an SVG only when the relationship has bran
 2. **Reading direction is left to right, then top to bottom.** Time and causality flow rightwards. Never make the reader's eye go up or backwards; loops are drawn as a labelled return arrow below the row.
 3. **Every node is a rounded box with one label of at most four words.** Details go in a second, smaller line (`.d-text-s`) or in the caption.
 4. **Colour means one thing.** `d-box-here` for the current point (one per diagram), `d-box-go` done or safe, `d-box-wait` in progress or caution, `d-box-stop` blocked or risk, `d-box-decide` the reader's choice. Everything else is a plain `d-box`. Never colour for decoration.
-5. **Arrows are labelled when the edge carries a condition** ("if the file exists", "every 5 min"). Unlabelled arrows mean "then".
-6. **Crossing lines are a bug.** Rearrange the nodes. A grid of 3 columns by 2 rows solves almost everything.
-7. **Use the `d-*` classes and never hard-coded colours**, so the diagram is correct in dark mode and in print.
-8. **Always a `<title>`** inside the SVG and a `figcaption.take` below it that states the single conclusion. The caption is the diagram's reason to exist. If you cannot write it, delete the diagram.
-9. **`viewBox` only, no width or height attributes.** The container scales it. Keep the aspect ratio between 2:1 and 5:1 so it never becomes a tall strip on a phone. Text inside is 15 px in viewBox units for an 800-wide box; do not go below 13.
-10. **Real content only.** No placeholder nodes, no "etc.", no decorative icons.
+5. **Labels sit on the thing they name.** Text goes inside the box, or touching the arrow it describes. Never a separate legend or key that the eye has to travel to and back (the split-attention effect; evidence in `design-system.md`). The caption below states the conclusion, it does not decode the drawing.
+6. **Arrows are labelled when the edge carries a condition** ("if the file exists", "every 5 min"). Unlabelled arrows mean "then".
+7. **Crossing lines are a bug.** Rearrange the nodes. A grid of 3 columns by 2 rows solves almost everything.
+8. **Use the `d-*` classes and never hard-coded colours**, so the diagram is correct in dark mode and in print.
+9. **Always a `<title>`** inside the SVG and a `figcaption.take` below it that states the single conclusion. The caption is the diagram's reason to exist. If you cannot write it, delete the diagram.
+10. **`viewBox` only, no width or height attributes.** The container scales it. Keep the aspect ratio between 2:1 and 5:1 so it never becomes a tall strip on a phone. Text inside is 15 px in viewBox units for an 800-wide box; do not go below 13.
+11. **Real content only.** No placeholder nodes, no "etc.", no decorative icons.
 
 ## Layout grid for an 800-wide viewBox
 
