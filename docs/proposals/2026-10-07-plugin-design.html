@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>One plugin, three lean skills</title>
+<meta name="description" content="Design of the html-explainer plugin: three lean skills on one design system, gather modes, English and Japanese from one page, the atlas add-on, what the lean rule kept and cut, install and build order.">
+<link rel="icon" href="data:,">
+<!-- Fonts are optional. The page is fully readable on the system stack if this link fails or the file is opened offline. -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap">
+<style>
+/* =====================================================================
+   html-explainer design system  ·  v1.0
+   Single-file, no build step, no external scripts. Fonts degrade to the
+   system stack. Works from file://, in an artifact, printed, and on a phone.
+   Colour has meaning. Nothing moves unless the reader moved it.
+   ===================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  /* surfaces */
+  --paper: #f2f5f8;          /* page background, cool fog, never cream */
+  --card: #ffffff;           /* chapter and component surface */
+  --well: #e8edf2;           /* inset surface for diagrams and code */
+  --line: #d3dce4;           /* hairline borders */
+  --line-strong: #aebbc8;
+  /* text */
+  --ink: #16222e;            /* body text, deep navy, never pure black */
+  --ink-soft: #4a5a6a;       /* secondary text */
+  --ink-faint: #7b8a99;      /* tertiary, kickers */
+  /* structure accent: "you are here", links, current, the answer */
+  --here: #2457d6;
+  --here-tint: #e3ebfb;
+  /* meaning colours, used for exactly one meaning each, everywhere */
+  --go: #178a5b;   --go-tint: #dff3ea;      /* done, safe, yes */
+  --wait: #b86e00; --wait-tint: #fdf0d8;    /* in progress, caution, needs a check */
+  --stop: #c43a4b; --stop-tint: #fbe3e6;    /* blocked, risk, no */
+  --decide: #6d4ed8; --decide-tint: #ece6fb;/* the reader must choose */
+  --memory: #fff4c2; --memory-line: #e3c45a;/* "remember this", offloaded working memory */
+  /* type */
+  --font-head: "Lexend", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-code: "Atkinson Hyperlegible Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
+  --size-0: 1rem;      /* 18px base */
+  --size-1: 1.25rem;   /* 22.5 */
+  --size-2: 1.5625rem; /* 28 */
+  --size-3: 1.95rem;   /* 35 */
+  --size-4: 2.44rem;   /* 44 */
+  --size-s: .889rem;   /* 16 */
+  --size-xs: .778rem;  /* 14 */
+  /* layout */
+  --measure: 62ch;     /* prose width */
+  --wide: 1120px;      /* page width, diagrams may use all of it */
+  --rail: 232px;
+  --gap: 1.5rem;
+  --r-chapter: 18px;   /* radius by hierarchy: chapter > component > chip */
+  --r-comp: 10px;
+  --r-chip: 999px;
+  --shadow-float: 0 10px 30px rgba(22, 34, 46, .14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+    --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+    --here: #7ea2ff; --here-tint: #1c2a4a;
+    --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+    --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+    --memory: #3a3315; --memory-line: #c9ad4a;
+    --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+  --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+  --here: #7ea2ff; --here-tint: #1c2a4a;
+  --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+  --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+  --memory: #3a3315; --memory-line: #c9ad4a;
+  --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--size-0); line-height: 1.6;
+  text-rendering: optimizeLegibility; overflow-wrap: anywhere;
+}
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 600; line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(1.75rem, 1.1rem + 2.6vw, var(--size-4)); font-weight: 700; }
+h2 { font-size: clamp(1.45rem, 1rem + 1.8vw, var(--size-3)); }
+h3 { font-size: var(--size-2); }
+h4 { font-size: var(--size-1); }
+p, ul, ol { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; hyphens: manual; }
+li { margin-bottom: .35em; }
+li::marker { color: var(--ink-faint); }
+a { color: var(--here); text-decoration-thickness: 1.5px; text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2.5px; }
+strong { font-weight: 700; }
+code, kbd, pre { font-family: var(--font-code); font-size: .92em; }
+code { background: var(--well); padding: .1em .35em; border-radius: 5px; }
+pre { background: var(--well); padding: 1rem; border-radius: var(--r-comp); overflow: auto; margin: 0 0 1em; line-height: 1.5; }
+pre code { background: none; padding: 0; }
+:focus-visible { outline: 3px solid var(--here); outline-offset: 3px; border-radius: 4px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg { max-width: 100%; height: auto; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 100; padding: .5rem 1rem; background: var(--here); color: #fff; border-radius: var(--r-comp); }
+.skip:focus { top: 1rem; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 3. Page frame ---------- */
+.progress { position: fixed; inset: 0 0 auto 0; height: 4px; background: var(--here); transform: scaleX(0); transform-origin: left; z-index: 60; }
+.page { width: min(100% - 2rem, var(--wide)); margin: 0 auto; padding: 1.5rem 0 6rem; }
+@media (min-width: 1100px) {
+  .page { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: 2.5rem; }
+  .rail { position: sticky; top: 1.5rem; align-self: start; max-height: calc(100vh - 3rem); overflow: auto; }
+}
+.rail { font-size: var(--size-s); }
+.rail ol { list-style: none; margin: 0 0 1rem; padding: 0; max-width: none; }
+.rail li { margin: 0; }
+.rail a { display: flex; gap: .6rem; align-items: baseline; padding: .4rem .6rem; border-radius: var(--r-comp); color: var(--ink-soft); text-decoration: none; }
+.rail a .dot { flex: none; width: .6rem; height: .6rem; border-radius: 50%; background: var(--line-strong); transform: translateY(-.1rem); }
+.rail a[aria-current="true"] { background: var(--here-tint); color: var(--ink); font-weight: 700; }
+.rail a[aria-current="true"] .dot { background: var(--here); }
+.rail a.done .dot { background: var(--go); }
+.rail .tools { display: flex; flex-wrap: wrap; gap: .5rem; padding: .25rem .6rem; }
+.rail .tools button { padding: .35rem .75rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
+.rail .tools button[aria-pressed="true"] { background: var(--here); border-color: var(--here); color: #fff; }
+@media (max-width: 1099px) {
+  .rail { position: sticky; top: 0; z-index: 50; margin: 0 -1rem 1.25rem; padding: .5rem 1rem; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .rail ol { display: flex; gap: .35rem; overflow-x: auto; margin: 0; padding-bottom: .25rem; scrollbar-width: none; }
+  .rail a { white-space: nowrap; padding: .35rem .7rem; border: 1px solid var(--line); background: var(--card); }
+  .rail .tools { padding: .4rem 0 0; }
+}
+main { min-width: 0; }
+
+/* ---------- 4. Opening: the answer first ---------- */
+.kicker { font-family: var(--font-head); font-weight: 500; font-size: var(--size-s); color: var(--ink-faint); margin: 0 0 .5rem; }
+.meta { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--ink-soft); font-size: var(--size-s); margin: .5rem 0 1.5rem; max-width: none; }
+.answer {
+  max-width: none; margin: 0 0 1.25rem; padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  border-left: 6px solid var(--here); background: var(--here-tint); border-radius: 0 var(--r-comp) var(--r-comp) 0;
+  font-family: var(--font-head); font-weight: 500; font-size: var(--size-1); line-height: 1.35; text-wrap: balance;
+}
+.keep { margin: 0 0 2rem; padding: 1rem 1.25rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-comp); max-width: none; }
+.keep > strong { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .4rem; }
+.keep ol { margin: 0; padding-left: 1.4rem; max-width: none; }
+.keep li { margin: 0 0 .15rem; }
+
+/* ---------- 5. Chapter map: the visual table of contents ---------- */
+.map { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: none; counter-reset: map; }
+.map li { margin: 0; counter-increment: map; }
+.map a { display: block; height: 100%; padding: .9rem 1rem .9rem 3.2rem; position: relative; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); color: var(--ink); text-decoration: none; }
+.map a::before { content: counter(map); position: absolute; left: 1rem; top: .85rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.map a:hover { border-color: var(--here); }
+.map b { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .15rem; }
+.map span { color: var(--ink-soft); font-size: var(--size-s); }
+
+/* ---------- 6. Chapter: one idea, self-contained ---------- */
+.chapter { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-chapter); padding: 1.5rem clamp(1rem, 3vw, 2rem) 1.25rem; margin: 0 0 2rem; scroll-margin-top: 4.5rem; }
+.chapter > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.chapter > header .kicker { margin: 0 0 .25rem; }
+.chapter > header h2 { margin: 0; }
+.chapter > header label { flex: none; display: inline-flex; align-items: center; gap: .4rem; font-size: var(--size-s); color: var(--ink-soft); padding-top: .35rem; }
+.chapter > header input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--go); margin: 0; }
+.from { display: flex; gap: .6rem; align-items: baseline; margin: 0 0 1.25rem; padding: .6rem .9rem; background: var(--well); border-radius: var(--r-comp); font-size: var(--size-s); color: var(--ink-soft); max-width: none; }
+.from b { color: var(--ink); font-family: var(--font-head); font-weight: 600; flex: none; }
+.remember { margin: 1.5rem 0 0; padding: .9rem 1.1rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-comp); max-width: none; display: flex; gap: .75rem; align-items: baseline; }
+.remember b { font-family: var(--font-head); font-weight: 600; flex: none; }
+@media (max-width: 560px) {
+  .remember, .from { display: block; }
+  .remember b, .from b { display: inline; margin-right: .3rem; }
+}
+
+/* ---------- 7. Figures and diagrams ---------- */
+.figure { margin: 1.25rem 0 1.5rem; padding: 1rem; background: var(--well); border-radius: var(--r-comp); border: 1px solid var(--line); }
+.figure > svg { display: block; width: 100%; height: auto; }
+.figure .take { margin: .9rem 0 0; padding: .5rem .75rem; background: var(--card); border-left: 4px solid var(--here); border-radius: 0 6px 6px 0; font-size: var(--size-s); max-width: none; }
+.figure .take b { font-family: var(--font-head); font-weight: 600; }
+/* svg diagram vocabulary: use these classes on shapes so both themes work */
+.d-box { fill: var(--card); stroke: var(--line-strong); stroke-width: 1.5; }
+.d-box-here { fill: var(--here-tint); stroke: var(--here); stroke-width: 2; }
+.d-box-go { fill: var(--go-tint); stroke: var(--go); stroke-width: 1.5; }
+.d-box-wait { fill: var(--wait-tint); stroke: var(--wait); stroke-width: 1.5; }
+.d-box-stop { fill: var(--stop-tint); stroke: var(--stop); stroke-width: 1.5; }
+.d-box-decide { fill: var(--decide-tint); stroke: var(--decide); stroke-width: 1.5; }
+.d-line { fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.d-line-soft { fill: none; stroke: var(--line-strong); stroke-width: 2; stroke-dasharray: 6 6; }
+.d-arrow { fill: var(--ink-soft); }
+.d-text { fill: var(--ink); font-family: var(--font-body); font-size: 15px; }
+.d-text-b { fill: var(--ink); font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+.d-text-s { fill: var(--ink-soft); font-family: var(--font-body); font-size: 13px; }
+.d-num { fill: #fff; font-family: var(--font-head); font-weight: 600; font-size: 13px; }
+.d-pin { fill: var(--here); }
+
+/* CSS flow: steps with connectors, no SVG needed */
+.flow { display: flex; flex-wrap: wrap; gap: .75rem; list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; counter-reset: flow; }
+.flow li { counter-increment: flow; flex: 1 1 150px; position: relative; padding: .8rem .9rem .8rem 2.9rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); min-height: 3.4rem; }
+.flow li::before { content: counter(flow); position: absolute; left: .8rem; top: .75rem; width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; background: var(--ink-soft); color: var(--card); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.flow li b { display: block; font-family: var(--font-head); font-weight: 600; }
+.flow li span { font-size: var(--size-s); color: var(--ink-soft); }
+.flow li.here { border-color: var(--here); background: var(--here-tint); }
+.flow li.here::before { background: var(--here); }
+.flow li.go { border-color: var(--go); } .flow li.go::before { background: var(--go); }
+.flow li.wait { border-color: var(--wait); } .flow li.wait::before { background: var(--wait); }
+.flow li.stop { border-color: var(--stop); } .flow li.stop::before { background: var(--stop); }
+@media (min-width: 700px) {
+  .flow li:not(:last-child)::after { content: ""; position: absolute; right: -.75rem; top: 50%; width: .75rem; height: 2px; background: var(--line-strong); }
+}
+
+/* ---------- 8. Comparison and decisions ---------- */
+.split { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 1rem 0 1.5rem; }
+.split > div { padding: 1rem 1.1rem; border-radius: var(--r-comp); border: 1.5px solid var(--line); background: var(--card); }
+.split > div > b { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .4rem; }
+.split .before { border-color: var(--stop); background: var(--stop-tint); }
+.split .after { border-color: var(--go); background: var(--go-tint); }
+.split ul { margin: 0; padding-left: 1.2rem; font-size: var(--size-s); }
+
+.decision { margin: 1rem 0 1.5rem; padding: 1.25rem; border: 2px solid var(--decide); border-radius: var(--r-comp); background: var(--decide-tint); }
+.decision > h3 { margin: 0 0 .25rem; display: flex; gap: .6rem; align-items: center; }
+.decision > h3::before { content: "?"; flex: none; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 50%; background: var(--decide); color: #fff; font-family: var(--font-head); font-size: var(--size-0); }
+.decision > p { color: var(--ink-soft); }
+.options { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 1rem 0; }
+.option { position: relative; padding: 1rem 1.1rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); }
+.option[data-rec] { border-color: var(--go); border-width: 2.5px; }
+.option[data-rec]::after { content: attr(data-rec); position: absolute; top: -.8rem; right: .9rem; padding: .15rem .65rem; background: var(--go); color: #fff; border-radius: var(--r-chip); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.option h4 { margin: 0 0 .5rem; }
+.option ul { list-style: none; padding: 0; margin: 0; font-size: var(--size-s); }
+.option li { padding-left: 1.4rem; position: relative; }
+.option li.plus::before { content: "✓"; position: absolute; left: 0; color: var(--go); font-weight: 700; }
+.option li.minus::before { content: "✗"; position: absolute; left: 0; color: var(--stop); font-weight: 700; }
+.option .cost { margin-top: .6rem; font-size: var(--size-s); color: var(--ink-soft); }
+.decision .nothing { margin: .5rem 0 0; padding: .6rem .9rem; background: var(--card); border-radius: 6px; font-size: var(--size-s); max-width: none; }
+.decision .nothing b { font-family: var(--font-head); font-weight: 600; }
+
+/* ---------- 9. Status, timeline, steps, tiles ---------- */
+.status { list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; border: 1.5px solid var(--line); border-radius: var(--r-comp); overflow: hidden; }
+.status li { display: grid; grid-template-columns: 1.1rem minmax(120px, 1fr) 2fr; gap: .9rem; align-items: baseline; padding: .7rem 1rem; background: var(--card); margin: 0; }
+.status li + li { border-top: 1px solid var(--line); }
+.status li::before { content: ""; width: .85rem; height: .85rem; border-radius: 50%; background: var(--line-strong); transform: translateY(.1rem); }
+.status li.go::before { background: var(--go); } .status li.wait::before { background: var(--wait); }
+.status li.stop::before { background: var(--stop); } .status li.decide::before { background: var(--decide); }
+.status li.here::before { background: var(--here); } .status li.memory::before { background: var(--memory-line); }
+.status li b { font-family: var(--font-head); font-weight: 600; }
+.status li span { color: var(--ink-soft); font-size: var(--size-s); }
+@media (max-width: 560px) { .status li { grid-template-columns: 1.1rem 1fr; } .status li span { grid-column: 2; } }
+
+.timeline { list-style: none; margin: 1.25rem 0 1.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; max-width: none; position: relative; }
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: .55rem; height: 3px; background: var(--line-strong); }
+.timeline li { position: relative; padding: 1.5rem .75rem 0 0; margin: 0; }
+.timeline li::before { content: ""; position: absolute; left: 0; top: 0; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card); border: 3px solid var(--line-strong); }
+.timeline li.go::before { background: var(--go); border-color: var(--go); }
+.timeline li.here::before { background: var(--here); border-color: var(--here); box-shadow: 0 0 0 5px var(--here-tint); }
+.timeline li.here .when { color: var(--here); }
+.timeline li.here .when::before { content: "You are here · "; font-weight: 700; }
+.timeline .when { display: block; font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); margin-bottom: .2rem; }
+.timeline .what { font-size: var(--size-s); color: var(--ink-soft); }
+
+.steps { list-style: none; margin: 1rem 0 1.5rem; padding: 0; counter-reset: step; max-width: none; }
+.steps > li { counter-increment: step; position: relative; padding: .25rem 0 .9rem 3rem; margin: 0; }
+.steps > li::before { content: counter(step); position: absolute; left: 0; top: .1rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; }
+.steps > li:not(:last-child)::after { content: ""; position: absolute; left: .95rem; top: 2.3rem; bottom: 0; width: 2px; background: var(--line); }
+.steps > li > b { font-family: var(--font-head); font-weight: 600; }
+
+.tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 1rem 0 1.5rem; }
+.tile { padding: .9rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); }
+.tile .n { display: block; font-family: var(--font-head); font-weight: 700; font-size: var(--size-3); line-height: 1; color: var(--here); }
+.tile .l { font-size: var(--size-s); color: var(--ink-soft); }
+.tile.go .n { color: var(--go); } .tile.wait .n { color: var(--wait); } .tile.stop .n { color: var(--stop); }
+
+/* ---------- 10. Metaphor, callouts, terms, folds ---------- */
+.metaphor { display: grid; grid-template-columns: 4rem 1fr; gap: 1rem; align-items: start; margin: 1rem 0 1.5rem; padding: 1rem 1.1rem; background: var(--card); border: 1.5px dashed var(--line-strong); border-radius: var(--r-comp); }
+.metaphor .icon { font-size: 2.6rem; line-height: 1; text-align: center; padding-top: .2rem; }
+.metaphor p { margin: 0; }
+.metaphor b { font-family: var(--font-head); font-weight: 600; }
+@media (max-width: 480px) { .metaphor { grid-template-columns: 1fr; } .metaphor .icon { text-align: left; } }
+
+.callout { margin: 1rem 0 1.5rem; padding: .9rem 1.1rem .9rem 1.25rem; border-left: 5px solid var(--line-strong); border-radius: 0 var(--r-comp) var(--r-comp) 0; background: var(--well); max-width: none; }
+.callout > b { font-family: var(--font-head); font-weight: 600; display: block; margin-bottom: .2rem; }
+.callout p:last-child { margin-bottom: 0; }
+.callout.tip { border-color: var(--go); background: var(--go-tint); }
+.callout.warn { border-color: var(--wait); background: var(--wait-tint); }
+.callout.stop { border-color: var(--stop); background: var(--stop-tint); }
+
+.term { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; align-items: baseline; margin: 1rem 0 1.5rem; padding: .8rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); max-width: none; font-size: var(--size-s); }
+.term dt { font-family: var(--font-head); font-weight: 600; }
+.term dd { margin: 0; color: var(--ink-soft); }
+@media (max-width: 480px) { .term { grid-template-columns: 1fr; } .term dd { margin-bottom: .5rem; } }
+dfn { font-style: normal; text-decoration: underline dotted var(--ink-faint); text-underline-offset: .2em; cursor: help; }
+
+details.fold { margin: 1rem 0 1.25rem; border: 1.5px solid var(--line); border-radius: var(--r-comp); background: var(--card); }
+details.fold > summary { list-style: none; cursor: pointer; padding: .75rem 1rem; font-family: var(--font-head); font-weight: 600; display: flex; gap: .6rem; align-items: center; color: var(--ink-soft); }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: "+"; flex: none; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line-strong); font-size: var(--size-s); }
+details.fold[open] > summary::before { content: "−"; }
+details.fold[open] > summary { border-bottom: 1px solid var(--line); color: var(--ink); }
+details.fold > :not(summary) { padding: 0 1rem; }
+details.fold > :nth-child(2) { padding-top: 1rem; }
+details.fold > :last-child { padding-bottom: 1rem; }
+
+/* ---------- 11. Closing: recap and the ask ---------- */
+.recap { margin: 0 0 1.5rem; padding: 1.25rem 1.5rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-chapter); max-width: none; }
+.recap h2 { margin-bottom: .6rem; }
+.recap ol { margin: 0; padding-left: 1.4rem; }
+.ask { margin: 0 0 2rem; padding: 1.25rem 1.5rem; border: 2.5px solid var(--decide); border-radius: var(--r-chapter); background: var(--card); }
+.ask h2 { margin-bottom: .5rem; }
+.ask .choices { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .5rem; }
+.ask .choices > * { padding: .7rem 1.1rem; border-radius: var(--r-comp); border: 2px solid var(--decide); background: var(--decide-tint); color: var(--ink); font-family: var(--font-head); font-weight: 600; text-decoration: none; }
+.ask .choices > *[data-rec] { background: var(--decide); color: #fff; }
+.ask .choices > *[data-rec]::after { content: " · recommended"; font-weight: 500; opacity: .85; }
+
+/* ---------- 12. Skim mode ---------- */
+/* Components whose list or copy lives inside a div wrapper must be exempted by
+   their INNER selector, not the wrapper class: `.options` and `.split` name the
+   WRAPPER, so `ul:not(.options)` never matched the lists inside them and skim
+   mode emptied every decision card and every before/after panel. */
+body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p):not(.option .cost),
+body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options):not(.option ul):not(.split ul),
+body[data-skim="on"] .chapter details.fold,
+body[data-skim="on"] .chapter .term,
+body[data-skim="on"] .chapter .from { display: none; }
+body[data-skim="on"] .chapter .figure,
+body[data-skim="on"] .chapter .remember { display: flex; }
+body[data-skim="on"] .chapter .figure { display: block; }
+
+/* ---------- 12b. Focus mode: one chapter at a time, reader paced ---------- */
+body[data-focus="on"] .map,
+body[data-focus="on"] .chapter:not([data-active]),
+body[data-focus="on"] .recap:not([data-active]),
+body[data-focus="on"] .ask:not([data-active]) { display: none; }
+.focus-nav { display: none; justify-content: space-between; align-items: center; gap: 1rem; margin: 0 0 2rem; }
+body[data-focus="on"] .focus-nav { display: flex; }
+.focus-nav button { padding: .7rem 1.2rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; }
+.focus-nav button[data-next] { background: var(--here); color: #fff; }
+.focus-nav button:disabled { opacity: .4; cursor: default; }
+.focus-nav .where { color: var(--ink-soft); font-size: var(--size-s); }
+
+/* ---------- 13. Print ---------- */
+@media print {
+  :root { --paper: #fff; --card: #fff; }
+  html { font-size: 11pt; }
+  .page { display: block; width: auto; padding: 0; }
+  .rail, .progress, .skip, .chapter > header label { display: none !important; }
+  .chapter { break-inside: avoid; border-color: #bbb; box-shadow: none; }
+  details.fold { break-inside: avoid; }
+  details.fold[open] > summary::before, details.fold > summary::before { display: none; }
+  a { color: inherit; text-decoration: none; }
+  .figure { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+
+<div class="page">
+  <nav class="rail" aria-label="Chapters">
+    <ol>
+      <li><a href="#shape"><span class="dot"></span>The shape</a></li>
+      <li><a href="#core"><span class="dot"></span>Skill 1: core</a></li>
+      <li><a href="#gather"><span class="dot"></span>Skill 2: gather</a></li>
+      <li><a href="#languages"><span class="dot"></span>Two languages</a></li>
+      <li><a href="#atlas"><span class="dot"></span>Skill 3: atlas</a></li>
+      <li><a href="#lean"><span class="dot"></span>Kept and cut</a></li>
+      <li><a href="#greenlight"><span class="dot"></span>Install and build</a></li>
+      <li><a href="#recap"><span class="dot"></span>Recap</a></li>
+    </ol>
+    <div class="tools">
+      <button type="button" data-skim aria-pressed="false">Skim mode</button>
+      <button type="button" data-focus aria-pressed="false">One chapter at a time</button>
+      <button type="button" data-theme-toggle>Dark / light</button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div class="focus-nav" aria-live="polite"><button type="button" data-prev>Previous</button><span class="where"></span><button type="button" data-next>Next</button></div>
+
+    <p class="kicker">Design proposal for the html-explainer plugin, 2026-10-07</p>
+    <h1>One plugin, three lean skills</h1>
+    <div class="meta"><span>Reading time about 7 minutes</span><span>Status: waiting for your greenlight</span><span>For: Rodrigo</span></div>
+
+    <p class="answer">One plugin, three skills on one shared design system: the core explainer with page types, gather with answer modes, and the atlas add-on, with a single checker as the only machinery.</p>
+
+    <div class="keep">
+      <strong>Keep in your head (only these)</strong>
+      <ol>
+        <li>Three skills, one template, one checker. Nothing else.</li>
+        <li>Your brother's two needs ship first: collect mode and Japanese.</li>
+        <li>About four build days; the atlas is half of them.</li>
+      </ol>
+    </div>
+
+    <ol class="map">
+      <li><a href="#shape"><b>The shape</b><span>What is in the plugin and what every skill shares.</span></a></li>
+      <li><a href="#core"><b>Skill 1: core</b><span>The explainer contract and its seven page types.</span></a></li>
+      <li><a href="#gather"><b>Skill 2: gather</b><span>Ask, collect, merge, and the ten modes.</span></a></li>
+      <li><a href="#languages"><b>Two languages</b><span>English and Japanese from one page, with the right fonts.</span></a></li>
+      <li><a href="#atlas"><b>Skill 3: atlas</b><span>Architecture reference with anchored claims.</span></a></li>
+      <li><a href="#lean"><b>Kept and cut</b><span>What the lean rule removed and the budgets that remain.</span></a></li>
+      <li><a href="#greenlight"><b>Install and build</b><span>How it installs, the build order, and the decision.</span></a></li>
+    </ol>
+
+    <!-- 1 -->
+    <section class="chapter" id="shape" data-keep="Three skills stand on one shared foundation. Change the foundation once, every page changes.">
+      <header>
+        <div><p class="kicker">Chapter 1 of 7, about 1 minute</p><h2>What is the plugin, in one picture?</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the skill today is one folder with a template, four guides and a checker. The plugin keeps all of it and adds two skills beside it.</p>
+
+      <figure class="figure">
+        <svg viewBox="0 0 800 300" role="img" aria-labelledby="fig-shape"><title id="fig-shape">Three skills sit on one shared foundation of template, guides, language files and scripts</title>
+          <rect class="d-box-here" x="20" y="30" width="220" height="70" rx="10"/><text class="d-text-b" x="130" y="60" text-anchor="middle">html-explainer</text><text class="d-text-s" x="130" y="82" text-anchor="middle">core contract, page types</text>
+          <rect class="d-box" x="290" y="30" width="220" height="70" rx="10"/><text class="d-text-b" x="400" y="60" text-anchor="middle">explainer-gather</text><text class="d-text-s" x="400" y="82" text-anchor="middle">ask, collect, merge</text>
+          <rect class="d-box" x="560" y="30" width="220" height="70" rx="10"/><text class="d-text-b" x="670" y="60" text-anchor="middle">explainer-atlas</text><text class="d-text-s" x="670" y="82" text-anchor="middle">architecture reference</text>
+          <path class="d-line" d="M130 100 V160"/><path class="d-line" d="M400 100 V160"/><path class="d-line" d="M670 100 V160"/>
+          <path class="d-arrow" d="M124 160 L130 172 L136 160 Z"/><path class="d-arrow" d="M394 160 L400 172 L406 160 Z"/><path class="d-arrow" d="M664 160 L670 172 L676 160 Z"/>
+          <rect class="d-box-go" x="20" y="172" width="760" height="56" rx="10"/><text class="d-text-b" x="400" y="196" text-anchor="middle">Shared foundation</text><text class="d-text-s" x="400" y="216" text-anchor="middle">template.html, design-system, writing, diagrams, i18n, atlas add-on</text>
+          <rect class="d-box" x="20" y="244" width="760" height="40" rx="10"/><text class="d-text-s" x="400" y="269" text-anchor="middle">scripts: check.mjs, translate.mjs, anchors.mjs, optional diagram.mjs. Zero dependencies.</text>
+        </svg>
+        <figcaption class="take"><b>Take from this:</b> the three skills own only their instructions; everything visual and every script lives once, underneath.</figcaption>
+      </figure>
+
+      <div class="tiles">
+        <div class="tile"><span class="n">3</span><span class="l">skills</span></div>
+        <div class="tile"><span class="n">1</span><span class="l">template and one checker</span></div>
+        <div class="tile go"><span class="n">0</span><span class="l">dependencies, agents, hooks or tests</span></div>
+      </div>
+
+      <details class="fold"><summary>Show the folder layout</summary>
+<pre><code>html-explainer/                   plugin root = the repository
+  .claude-plugin/plugin.json      name, version, skills
+  .claude-plugin/marketplace.json the repo is its own marketplace
+  skills/html-explainer/          SKILL.md (under 600 words), types.md
+  skills/explainer-gather/        SKILL.md, modes.md
+  skills/explainer-atlas/         SKILL.md
+  assets/                         template.html, design-system.md, writing.md,
+                                  diagrams.md, gallery.html, atlas.css, atlas.js,
+                                  i18n/ui.ja.json, glossary.example.json, merge.html
+  scripts/                        check.mjs, translate.mjs, anchors.mjs, diagram.mjs
+  README.md  LICENSE</code></pre>
+      </details>
+
+      <p class="remember"><b>Remember:</b> three skills stand on one shared foundation; change the foundation once and every page changes.</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="chapter" id="core" data-keep="Template plus contract plus a type entry makes a page. Seven types, one short file.">
+      <header>
+        <div><p class="kicker">Chapter 2 of 7, about 1 minute</p><h2>Skill 1: the core explainer and its page types</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the foundation holds the template and the guides. The core skill is the contract that turns them into a page.</p>
+
+      <p>The core skill is today's skill, trimmed to under 600 words. Page types stop being prose patterns and become one short file the skill reads when it needs a type.</p>
+
+      <figure class="figure">
+        <svg viewBox="0 0 800 260" role="img" aria-labelledby="fig-layers"><title id="fig-layers">Template, core contract and a page-type entry combine into one finished page</title>
+          <rect class="d-box" x="20" y="20" width="300" height="60" rx="10"/><text class="d-text-b" x="170" y="45" text-anchor="middle">Template</text><text class="d-text-s" x="170" y="66" text-anchor="middle">tokens, components, modes, fonts</text>
+          <rect class="d-box" x="20" y="100" width="300" height="60" rx="10"/><text class="d-text-b" x="170" y="125" text-anchor="middle">Core contract</text><text class="d-text-s" x="170" y="146" text-anchor="middle">answer, keep, chapters, remember, recap, ask</text>
+          <rect class="d-box-decide" x="20" y="180" width="300" height="60" rx="10"/><text class="d-text-b" x="170" y="205" text-anchor="middle">One type entry</text><text class="d-text-s" x="170" y="226" text-anchor="middle">decision, status, spec, release, research, handover</text>
+          <path class="d-line" d="M320 50 H440"/><path class="d-line" d="M320 130 H440"/><path class="d-line" d="M320 210 H440"/>
+          <path class="d-arrow" d="M440 44 L452 50 L440 56 Z"/><path class="d-arrow" d="M440 124 L452 130 L440 136 Z"/><path class="d-arrow" d="M440 204 L452 210 L440 216 Z"/>
+          <rect class="d-box-here" x="452" y="20" width="328" height="220" rx="12"/><text class="d-text-b" x="616" y="120" text-anchor="middle">A finished page</text><text class="d-text-s" x="616" y="144" text-anchor="middle">single file, under 400 KB, offline, both themes</text>
+        </svg>
+        <figcaption class="take"><b>Take from this:</b> a type adds a few required components and checker rules; it never changes the template or the contract.</figcaption>
+      </figure>
+
+      <ul class="status">
+        <li class="here"><b>explainer</b><span>Understand one thing. Nothing beyond the contract.</span></li>
+        <li class="decide"><b>decision</b><span>One decision card per ruling, recommendation marked, do-nothing stated.</span></li>
+        <li><b>status</b><span>Timeline with one "you are here", status board, next steps, since-last-time list.</span></li>
+        <li><b>spec</b><span>Flow of what it does, split of what changes, wireframe when UI is touched, approve or hold.</span></li>
+        <li><b>release</b><span>Tiles for counts that matter, before and after per theme.</span></li>
+        <li><b>research</b><span>Evidence strength per finding, sources in folds, open questions.</span></li>
+        <li><b>handover</b><span>State, in flight, next, what is a claim versus verified.</span></li>
+      </ul>
+
+      <p class="remember"><b>Remember:</b> template plus contract plus one type entry makes a page; seven types fit in one short file.</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="chapter" id="gather" data-keep="Gather is one mechanic with ten modes. Collect ships first; the rest are table rows.">
+      <header>
+        <div><p class="kicker">Chapter 3 of 7, about 1 minute</p><h2>Skill 2: gather, the page that asks and collects</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the core skill makes read-only pages. Your brother's pages also ask, and that needs its own skill because it needs its own components.</p>
+
+      <p>Every gather page runs the same five moves. Modes change only what the answer control is and how the author sees the merged result.</p>
+
+      <ol class="flow">
+        <li class="go"><b>Explain</b><span>A chapter, as today.</span></li>
+        <li class="here"><b>Ask</b><span>One question, a stable id, what a good answer holds.</span></li>
+        <li><b>Type</b><span>Saved in the browser. Nothing leaves the page.</span></li>
+        <li><b>Copy all</b><span>Markdown, JSON or CSV. Question text verbatim.</span></li>
+        <li class="wait"><b>Merge</b><span>Paste everyone's copies into one view per question.</span></li>
+      </ol>
+
+      <ul class="status">
+        <li class="go"><b>collect</b><span>Open answers after chapters. Ships first.</span></li>
+        <li class="wait"><b>confirm</b><span>Understood, agree or concern per chapter, with a comment.</span></li>
+        <li class="wait"><b>choose</b><span>Pick an option, give a one-line reason. Tallied.</span></li>
+        <li class="wait"><b>prioritise</b><span>Rank items or spend points. Combined ranking.</span></li>
+        <li class="wait"><b>annotate</b><span>Comment pins per section of a draft survey or guide.</span></li>
+        <li class="wait"><b>check</b><span>Check questions plus a teach-back sentence.</span></li>
+        <li class="wait"><b>protocol, pilot, readout, recurring</b><span>Interview notes, survey test, findings reactions, same questions over time.</span></li>
+      </ul>
+
+      <details class="fold"><summary>Show the copy-all shape and the merge tool</summary>
+<pre><code># &lt;page title&gt;: answers from &lt;name&gt; on &lt;date&gt; (&lt;lang&gt;)
+## [q3] &lt;question text, verbatim&gt;
+&lt;answer&gt;
+## Not answered
+[q5] &lt;question text&gt;</code></pre>
+        <p><code>merge.html</code> is one file. Paste or drop several copies; it groups by question id, names each respondent, tags language and date, and exports Markdown, JSON or CSV.</p>
+      </details>
+
+      <p class="remember"><b>Remember:</b> gather is one mechanic with ten modes; collect ships first and the rest are table rows.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="chapter" id="languages" data-keep="One source, two pages. Same ids, so Japanese and English answers merge. Japanese gets its own fonts and limits.">
+      <header>
+        <div><p class="kicker">Chapter 4 of 7, about 1 minute</p><h2>English and Japanese from one page</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> gather pages carry a stable id on every question. That id is what makes a Japanese version mergeable with the English one.</p>
+
+      <figure class="figure">
+        <svg viewBox="0 0 800 260" role="img" aria-labelledby="fig-lang"><title id="fig-lang">An English page is extracted to a strings file, translated with a glossary, and written back as a Japanese page with the same ids</title>
+          <rect class="d-box" x="20" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="107" y="60" text-anchor="middle">English page</text><text class="d-text-s" x="107" y="82" text-anchor="middle">finished, checked</text>
+          <path class="d-line" d="M195 65 H203"/><path class="d-arrow" d="M203 59 L215 65 L203 71 Z"/>
+          <rect class="d-box" x="215" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="302" y="60" text-anchor="middle">strings.en.json</text><text class="d-text-s" x="302" y="82" text-anchor="middle">every text node, by id</text>
+          <path class="d-line" d="M390 65 H398"/><path class="d-arrow" d="M398 59 L410 65 L398 71 Z"/>
+          <rect class="d-box-decide" x="410" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="497" y="60" text-anchor="middle">Translate</text><text class="d-text-s" x="497" y="82" text-anchor="middle">agent, with a glossary</text>
+          <path class="d-line" d="M585 65 H593"/><path class="d-arrow" d="M593 59 L605 65 L593 71 Z"/>
+          <rect class="d-box-go" x="605" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="692" y="60" text-anchor="middle">Japanese page</text><text class="d-text-s" x="692" y="82" text-anchor="middle">lang, fonts, strings swapped</text>
+          <path class="d-line" d="M107 100 V150"/><path class="d-line" d="M692 100 V150"/>
+          <path class="d-arrow" d="M101 150 L107 162 L113 150 Z"/><path class="d-arrow" d="M686 150 L692 162 L698 150 Z"/>
+          <rect class="d-box-go" x="20" y="162" width="760" height="70" rx="10"/><text class="d-text-b" x="400" y="190" text-anchor="middle">Same question ids in both pages</text><text class="d-text-s" x="400" y="212" text-anchor="middle">so a Japanese respondent's answers merge with an English respondent's, by question</text>
+        </svg>
+        <figcaption class="take"><b>Take from this:</b> translation never touches the layout or the ids; it swaps text, language, fonts and interface strings.</figcaption>
+      </figure>
+
+      <div class="split">
+        <div><b>English page</b><ul><li>Atkinson Hyperlegible Next body, Lexend headings</li><li>Line height 1.6, measure 62 characters</li><li>Paragraph under 40 words</li><li>Skim mode, Done, Remember, Recap</li></ul></div>
+        <div><b>Japanese page</b><ul><li>BIZ UDPGothic body and headings, a universal-design face</li><li>Line height 1.75, measure about 36 em, letter spacing 0.03 em, no italics</li><li>Paragraph under 90 characters, sentence under 60</li><li>ざっと読む, 完了, 覚えておく, まとめ</li></ul></div>
+      </div>
+
+      <p>Audience sets the register: coworkers in plain business Japanese, executives shorter, engineers with English terms, the public in the style of やさしい日本語.</p>
+
+      <p class="remember"><b>Remember:</b> one source, two pages, same ids, so answers merge across languages; Japanese gets its own fonts, spacing and limits.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="chapter" id="atlas" data-keep="Atlas: read the code, write anchored content, render with the add-on, check anchors. Three states kept apart.">
+      <header>
+        <div><p class="kicker">Chapter 5 of 7, about 1 minute</p><h2>Skill 3: the atlas, an architecture reference you can trust</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> explainers are one-sitting reads. An atlas is a reference people come back to, and it must say where every claim comes from.</p>
+
+      <p>The FormIntact backend atlas is the model: every claim anchored to a file and line at a recorded revision, three states kept apart, one example entity travelling through the system. The plugin keeps that and drops the heavy pipeline.</p>
+
+      <figure class="figure">
+        <svg viewBox="0 0 800 280" role="img" aria-labelledby="fig-atlas"><title id="fig-atlas">Four steps from code to a checked atlas, and the three states every element carries</title>
+          <rect class="d-box" x="20" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="107" y="60" text-anchor="middle">Read the code</text><text class="d-text-s" x="107" y="82" text-anchor="middle">agent, one layer at a time</text>
+          <path class="d-line" d="M195 65 H203"/><path class="d-arrow" d="M203 59 L215 65 L203 71 Z"/>
+          <rect class="d-box-decide" x="215" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="302" y="60" text-anchor="middle">Anchored content</text><text class="d-text-s" x="302" y="82" text-anchor="middle">file, line, revision per claim</text>
+          <path class="d-line" d="M390 65 H398"/><path class="d-arrow" d="M398 59 L410 65 L398 71 Z"/>
+          <rect class="d-box" x="410" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="497" y="60" text-anchor="middle">Render</text><text class="d-text-s" x="497" y="82" text-anchor="middle">template plus atlas add-on</text>
+          <path class="d-line" d="M585 65 H593"/><path class="d-arrow" d="M593 59 L605 65 L593 71 Z"/>
+          <rect class="d-box-go" x="605" y="30" width="175" height="70" rx="10"/><text class="d-text-b" x="692" y="60" text-anchor="middle">anchors.mjs</text><text class="d-text-s" x="692" y="82" text-anchor="middle">every file:line exists</text>
+          <text class="d-text-b" x="20" y="150">Every element carries one of three states</text>
+          <rect class="d-box" x="20" y="170" width="230" height="70" rx="10"/><text class="d-text-b" x="135" y="200" text-anchor="middle">Current behaviour</text><text class="d-text-s" x="135" y="222" text-anchor="middle">solid</text>
+          <rect class="d-box-wait" x="285" y="170" width="230" height="70" rx="10"/><text class="d-text-b" x="400" y="200" text-anchor="middle">Built but dormant</text><text class="d-text-s" x="400" y="222" text-anchor="middle">amber</text>
+          <rect class="d-line-soft" x="550" y="170" width="230" height="70" rx="10"/><text class="d-text-b" x="665" y="200" text-anchor="middle">Adopted target</text><text class="d-text-s" x="665" y="222" text-anchor="middle">dashed, not built</text>
+        </svg>
+        <figcaption class="take"><b>Take from this:</b> the atlas is a dated snapshot that can prove its claims; the three states stop it from implying more than exists.</figcaption>
+      </figure>
+
+      <div class="tiles">
+        <div class="tile"><span class="n">38</span><span class="l">routes in the FormIntact reference atlas</span></div>
+        <div class="tile"><span class="n">23</span><span class="l">tables, 267 columns, all anchored</span></div>
+        <div class="tile wait"><span class="n">3 MB</span><span class="l">folder budget, only because sources are embedded</span></div>
+      </div>
+
+      <p>The add-on gives atlas pages four things the explainer lacks. A system map with each connection on its own track. An inspector that opens source with line numbers. Search. Permalinks per view.</p>
+
+      <p>The opening keeps the explainer contract, so a newcomer can still read an atlas in one sitting.</p>
+
+      <details class="fold"><summary>Show what was dropped from the FormIntact pipeline</summary>
+        <p>Stack-specific inventory extractors, the screenshot verifier at five widths, the drift script and the generated companion skill. The agent reads the code and writes anchors; a 30-line script checks that each anchor exists at the recorded revision. Layers accepted: backend, frontend, data, infra, whole system. Inputs: repository, layer, the example entity to follow, and where the adopted target comes from.</p>
+      </details>
+
+      <p class="remember"><b>Remember:</b> read the code, write anchored content, render with the add-on, check the anchors; three states kept apart everywhere.</p>
+    </section>
+
+    <!-- 6 -->
+    <section class="chapter" id="lean" data-keep="Kept: design system, modes, gather, Japanese, atlas visuals, one checker. Cut: agents, hooks, evals, verifiers, ceremony.">
+      <header>
+        <div><p class="kicker">Chapter 6 of 7, about 1 minute</p><h2>What the lean rule kept and what it cut</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> three skills and a shared foundation. Your rule was lean and performant with no loss of design quality, and no testing or ceremony.</p>
+
+      <div class="split">
+        <div class="after"><b>Kept, because it is the product</b><ul><li>Design system: tokens, components, template, fonts</li><li>Writing and diagram rules</li><li>Skim, one-chapter, dark mode</li><li>Gather mechanic and modes</li><li>Japanese block and translate script</li><li>Atlas add-on and anchor check</li><li>One checker, 50 ms, zero dependencies</li></ul></div>
+        <div class="before"><b>Cut, because it is process</b><ul><li>Reviewer agent</li><li>Checker hook on every write</li><li>Evals and example pages per type</li><li>Atlas screenshot verifier and drift script</li><li>Companion-skill generator</li><li>Changelog ceremony; a git tag is the release</li><li>Three manual reads, now "open it once"</li></ul></div>
+      </div>
+
+      <div class="tiles">
+        <div class="tile"><span class="n">600</span><span class="l">words maximum for the core skill</span></div>
+        <div class="tile"><span class="n">15 KB</span><span class="l">template CSS, script under 6 KB</span></div>
+        <div class="tile go"><span class="n">4</span><span class="l">scripts, each under 300 lines</span></div>
+      </div>
+
+      <p class="remember"><b>Remember:</b> kept the design system, the modes, gather, Japanese, the atlas visuals and one checker; cut agents, hooks, evals, verifiers and ceremony.</p>
+    </section>
+
+    <!-- 7 -->
+    <section class="chapter" id="greenlight" data-keep="Install with two commands. Build in five steps over four days. Pick one loading route.">
+      <header>
+        <div><p class="kicker">Chapter 7 of 7, about 1 minute</p><h2>How it installs, how it gets built, and what to decide</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the plugin is defined. This chapter is what you need to say yes.</p>
+
+      <ol class="steps">
+        <li><b>Add the marketplace.</b> The repository is its own marketplace once the manifest is committed.</li>
+        <li><b>Install the plugin.</b> One command; your brother updates with one more.</li>
+        <li><b>Pick one loading route.</b> The junction at your personal skills folder and the plugin would both trigger the skill. Keep one.</li>
+      </ol>
+
+      <details class="fold"><summary>Show the commands</summary>
+<pre><code>/plugin marketplace add ariasr47/html-explainer-skill
+/plugin install html-explainer@html-explainer-skill</code></pre>
+        <p>Your local catalog (`rodrigo-agent-skills`) can carry the same package; that stays your call.</p>
+      </details>
+
+      <ol class="timeline">
+        <li class="here"><span class="when">Step 0, 1 hour</span><span class="what">Contrast tokens, glyphs in dots, gallery synced with your skim fix.</span></li>
+        <li><span class="when">Step 1, half a day</span><span class="what">Restructure into the plugin layout, write types.md, fix paths.</span></li>
+        <li><span class="when">Step 2, 1.5 days</span><span class="what">Gather: collect mode, merge tool, exports; then the other modes.</span></li>
+        <li><span class="when">Step 3, up to 1 day</span><span class="what">Japanese block, interface strings, translate script, language rules.</span></li>
+        <li><span class="when">Step 4, up to 2 days</span><span class="what">Atlas add-on, anchor check, skill text.</span></li>
+      </ol>
+
+      <div class="callout warn"><b>One thing to check before step 1</b><p>Your pending edits in the checkout (the skim-mode fix, README notes, plugin metadata) are uncommitted. Step 1 commits them first so nothing is lost in the move.</p></div>
+
+      <div class="decision">
+        <h3>Greenlight what?</h3>
+        <p>All three options use the lean layout. They differ in how much ships now.</p>
+        <div class="options">
+          <div class="option" data-rec="Recommended">
+            <h4>Greenlight all five steps</h4>
+            <ul><li class="plus">Your brother's needs land in steps 2 and 3</li><li class="plus">One restructure, no second move later</li><li class="minus">About four days of Sonnet lane</li></ul>
+          </div>
+          <div class="option">
+            <h4>Steps 0 to 3, hold the atlas</h4>
+            <ul><li class="plus">Everything except the expensive part</li><li class="minus">Atlas pages keep being hand-built like FormIntact's</li></ul>
+          </div>
+          <div class="option">
+            <h4>Step 0 only</h4>
+            <ul><li class="plus">One hour, page becomes accessible</li><li class="minus">Still one skill, no gather, no Japanese</li></ul>
+          </div>
+        </div>
+        <p class="nothing"><b>If you do nothing:</b> the skill keeps working as today, with the contrast defects and no answer fields.</p>
+      </div>
+
+      <p class="remember"><b>Remember:</b> two commands to install, five steps over about four days, and pick one loading route.</p>
+    </section>
+
+    <section class="recap" id="recap">
+      <h2>Recap</h2>
+      <ol>
+        <li>Three skills stand on one shared foundation; change the foundation once and every page changes.</li>
+        <li>Template plus contract plus one type entry makes a page; seven types fit in one short file.</li>
+        <li>Gather is one mechanic with ten modes; collect ships first and the rest are table rows.</li>
+        <li>One source, two pages, same ids, so answers merge across languages; Japanese gets its own fonts, spacing and limits.</li>
+        <li>Read the code, write anchored content, render with the add-on, check the anchors; three states kept apart everywhere.</li>
+        <li>Kept the design system, the modes, gather, Japanese, the atlas visuals and one checker; cut agents, hooks, evals, verifiers and ceremony.</li>
+        <li>Two commands to install, five steps over about four days, and pick one loading route.</li>
+      </ol>
+    </section>
+
+    <section class="ask">
+      <h2>What I need from you</h2>
+      <p>Which scope gets the greenlight?</p>
+      <div class="choices"><a href="#greenlight" data-rec>All five steps</a><a href="#greenlight">Steps 0 to 3, hold the atlas</a><a href="#greenlight">Step 0 only</a></div>
+      <p class="nothing"><b>If you do nothing:</b> the design waits in the repo; nothing changes for you or your brother.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* Optional behaviour. The page reads fine with JavaScript off. */
+(function () {
+  'use strict';
+  var d = document, root = d.documentElement, body = d.body;
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  var key = 'explainer:' + (location.pathname || 'page');
+
+  /* theme */
+  var saved = store.get('explainer:theme'); if (saved) root.setAttribute('data-theme', saved);
+  var tt = d.querySelector('[data-theme-toggle]');
+  if (tt) tt.addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark'; root.setAttribute('data-theme', next); store.set('explainer:theme', next);
+  });
+
+  /* skim mode */
+  var sk = d.querySelector('[data-skim]');
+  if (sk) sk.addEventListener('click', function () {
+    var on = body.getAttribute('data-skim') !== 'on';
+    body.setAttribute('data-skim', on ? 'on' : 'off'); sk.setAttribute('aria-pressed', String(on));
+  });
+
+  /* focus mode: one chapter at a time, reader paced */
+  var fb = d.querySelector('[data-focus]');
+  var parts = [].slice.call(d.querySelectorAll('.chapter, .recap, .ask'));
+  var nav = d.querySelector('.focus-nav'), idx = 0;
+  function showPart(i) {
+    idx = Math.max(0, Math.min(parts.length - 1, i));
+    parts.forEach(function (p, n) { if (n === idx) p.setAttribute('data-active', ''); else p.removeAttribute('data-active'); });
+    if (nav) {
+      nav.querySelector('[data-prev]').disabled = idx === 0;
+      nav.querySelector('[data-next]').disabled = idx === parts.length - 1;
+      var h = parts[idx].querySelector('h2'); nav.querySelector('.where').textContent = (idx + 1) + ' of ' + parts.length + (h ? ': ' + h.textContent : '');
+    }
+    if (body.getAttribute('data-focus') === 'on') { var top = nav ? nav.getBoundingClientRect().top + scrollY - 8 : 0; scrollTo(0, top); }
+  }
+  if (fb && parts.length) {
+    fb.addEventListener('click', function () {
+      var on = body.getAttribute('data-focus') !== 'on';
+      body.setAttribute('data-focus', on ? 'on' : 'off'); fb.setAttribute('aria-pressed', String(on));
+      if (on) { var cur = parts.findIndex(function (p) { return p.getBoundingClientRect().bottom > 120; }); showPart(cur < 0 ? 0 : cur); }
+    });
+    if (nav) {
+      nav.querySelector('[data-prev]').addEventListener('click', function () { showPart(idx - 1); });
+      nav.querySelector('[data-next]').addEventListener('click', function () { showPart(idx + 1); });
+    }
+    d.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.rail a[href^="#"], .map a[href^="#"]');
+      if (!a || body.getAttribute('data-focus') !== 'on') return;
+      var t = d.getElementById(a.getAttribute('href').slice(1)); var n = parts.indexOf(t);
+      if (n >= 0) { e.preventDefault(); showPart(n); }
+    });
+  }
+
+  /* progress bar */
+  var bar = d.querySelector('.progress');
+  function progress() {
+    if (!bar) return; var h = root.scrollHeight - innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')';
+  }
+  addEventListener('scroll', progress, { passive: true }); addEventListener('resize', progress); progress();
+
+  /* current chapter in the rail */
+  var links = [].slice.call(d.querySelectorAll('.rail a[href^="#"]'));
+  var targets = links.map(function (a) { return d.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+  if ('IntersectionObserver' in window && targets.length) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) current = e.target; });
+      links.forEach(function (a) { a.setAttribute('aria-current', current && a.getAttribute('href') === '#' + current.id ? 'true' : 'false'); });
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* done checkboxes, remembered per page */
+  var done = {}; try { done = JSON.parse(store.get(key + ':done') || '{}'); } catch (e) {}
+  [].slice.call(d.querySelectorAll('.chapter')).forEach(function (c) {
+    var box = c.querySelector('input[data-done]'); if (!box) return;
+    var link = d.querySelector('.rail a[href="#' + c.id + '"]');
+    function paint() { if (link) link.classList.toggle('done', box.checked); }
+    box.checked = !!done[c.id]; paint();
+    box.addEventListener('change', function () { done[c.id] = box.checked; store.set(key + ':done', JSON.stringify(done)); paint(); });
+  });
+})();
+</script>
+</body>
+</html>
