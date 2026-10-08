@@ -119,7 +119,8 @@ Each component encodes one kind of information. Use it only for that. Full marku
 | Chapter | `section.chapter` | One idea | Has a kicker with position and time, `.from`, a body, optional folds, one `.remember` |
 | Carry-forward | `p.from` | The one prior fact this chapter needs | Restated in full, never "as above" |
 | Remember line | `p.remember` | The one sentence to keep from the chapter | Copied verbatim into the recap |
-| Figure | `figure.figure` + `figcaption.take` | A relationship that prose cannot hold | Always has a take-away caption |
+| Figure | `figure.figure` + `figcaption.take` | A relationship that prose cannot hold | Always has a take-away caption. Scrolls sideways on a phone; an `svg.narrow` twin replaces the wide drawing there |
+| Take line | `p.take` straight after a component | What a status board, split, flow or tiles proves | One line; every chapter's picture gets one |
 | Stepper | `figure.stepper` + `.stepper-nav` | Change over time, one step at a time | Everything stays visible and steps not lit are dimmed; the caption shows the current step; step 1 carries the point; no autoplay |
 | Views | `div.views` + `.views-tabs` + `.view` | Several views of one thing | The first tab is open and carries the point; the others are `hidden` |
 | Minimap | `figure.minimap` | Where this chapter sits in the whole | The page's master SVG, small; `data-lit` names the lit node and the rest dim |
@@ -129,7 +130,7 @@ Each component encodes one kind of information. Use it only for that. Full marku
 | Status board | `ul.status` | Health of several items | One dot colour per row, one line each |
 | Timeline | `ol.timeline` | Position in time | Exactly one `li.here` |
 | Steps | `ol.steps` | Ordered actions | Bold verb first, one line, detail in a fold |
-| Tiles | `div.tiles` | Numbers that change the decision | Label says what the number means |
+| Tiles | `div.tiles` | Numbers that change the decision | Label says what the number means. The number never wraps and shrinks to fit its tile, so keep it short: `$24k`, not `$24,000+` |
 | Metaphor | `div.metaphor` | An analogy with an exact mapping | One per chapter at most; say where it stops |
 | Callout | `div.callout` `.tip .warn .stop` | Something that changes what the reader does | Not for asides |
 | Term box | `dl.term` | Plain-English definitions | Directly under the first use |

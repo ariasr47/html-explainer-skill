@@ -30,7 +30,9 @@ Reach for CSS components first. Write an SVG only when the relationship has bran
 8. **Use the `d-*` classes and never hard-coded colours**, so the diagram is correct in dark mode and in print.
 9. **Always a `<title>`** inside the SVG and a `figcaption.take` below it that states the single conclusion. The caption is the diagram's reason to exist. If you cannot write it, delete the diagram.
 10. **`viewBox` only, no width or height attributes.** The container scales it. Keep the aspect ratio between 2:1 and 5:1 so it never becomes a tall strip on a phone. Text inside is 15 px in viewBox units for an 800-wide box; do not go below 13.
-11. **Real content only.** No placeholder nodes, no "etc.", no decorative icons.
+11. **Readable on a phone.** Scaled to a phone, an 800-wide diagram would shrink 13 px labels to about 5 px. Under 560 px the template keeps a figure's svg at 640 px and lets the figure scroll sideways, with its caption pinned in view, so 13 px labels render at about 10 px. When sideways scrolling would hide the point, draw a second, top-to-bottom version in the same figure as `<svg class="narrow" viewBox="0 0 360 ...">`; it replaces the wide one on phones. The checker fails any diagram whose smallest label renders under 9 px on a 375 px phone.
+12. **Real content only.** No placeholder nodes, no "etc.", no decorative icons.
+13. **Every chapter's picture gets a take line.** Under an SVG it is the `figcaption.take`. Under any other component (a status board, a split, a flow, tiles) it is a `p.take` placed straight after it. The checker warns about a chapter without one.
 
 ## Layout grid for an 800-wide viewBox
 
