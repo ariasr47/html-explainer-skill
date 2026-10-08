@@ -1,0 +1,11 @@
+{
+  "terms": [
+    { "en": "explainer", "ja": "説明ページ", "keep": false },
+    { "en": "FormIntact", "ja": "FormIntact", "keep": true },
+    { "en": "respondent", "ja": "回答者", "keep": false },
+    { "en": "handover", "ja": "引き継ぎ", "keep": false },
+    { "en": "release notes", "ja": "リリースノート", "keep": false },
+    { "en": "stakeholder", "ja": "関係者", "keep": false },
+    { "en": "API", "ja": "API", "keep": true }
+  ]
+}
