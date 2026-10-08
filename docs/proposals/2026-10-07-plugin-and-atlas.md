@@ -195,6 +195,30 @@ Per atlas run, the curation (reading the code and writing anchored content) is t
 - The atlas is a dated snapshot. The companion skill's "check current source first" rule is what keeps it from becoming a lie; carry it over verbatim in spirit.
 - Two install routes at once (junction and plugin) will double-trigger the skill. Pick one.
 
+## What carries over from the research
+
+Mapping of `docs/research/2026-10-07-next-level.md` to the greenlit build.
+
+| Research recommendation | Status after the lean plugin decision |
+|---|---|
+| Contrast tokens, darker tertiary ink, glyphs in dots (WCAG 1.4.1) | Built in step 0 (template and checker) |
+| Labels on the diagram, one job per visual (caption rule) | Already in the design system; unchanged |
+| Default state of any interactive figure must carry the point (readers skip clicks) | Rule added to the core skill and design system in step 1 |
+| Headings as the question the chapter answers; time per chapter in the kicker | Rules added in step 1; no code |
+| Answer fields, collect bar, merge tool (the brother's use) | Step 2, with the ten modes as table rows |
+| English and Japanese from one page, Japanese fonts and limits | Step 3 |
+| Isometric and system-map visuals for architecture, anchored claims, three states | Step 4, the atlas add-on |
+| Stepper figure (fixed segments), perspectives tabs, repeated mini-map | Still recommended; not in the five steps. Proposed as step 5, about one day, zero dependencies |
+| Read aloud (Web Speech API), reading ruler, resume where you left off, keyboard shortcuts, finish state | Still recommended; same step 5 |
+| Comfort controls for spacing | Low expected effect; optional in step 5 or skipped |
+| Screenshot frame, concreteness fading | Still valid; later, opt-in rich media |
+| Knob with presets before sliders | Still valid; later |
+| 3D viewer behind a button, physical subjects only; animation only with a stated job | Policy text in the design system; nothing built |
+| Diagram compiler | Optional script; not in this build |
+| Inliner for the gallery | Dropped; the gallery carries a copy of the style block |
+| Fidelity gate, evals, example pages, verifier, drift, companion generator, ask-this-page | Withdrawn by the lean rule (ask-this-page stays an idea) |
+| Panel strip (comics), scroll-triggered narratives, bionic bolding, dyslexia fonts | Not recommended by the evidence; not built |
+
 ## Decision requested
 
 A. Plugin with three skills (core with a type registry, gather, atlas), one reviewer agent, one hook. Recommended.
