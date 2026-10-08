@@ -91,12 +91,62 @@ What changes for an ADHD reader compared with the FormIntact original: the atlas
 
 Layers the type should accept from day one: backend, frontend, data, infra, whole system. Inputs: repository path, layer, the example entity to follow, and where "adopted target" comes from (a `.spire` contract, a proposal file, or none).
 
+## The gather family: variants of "ask and collect"
+
+Rodrigo's brother is a research manager. "Ask and collect" is one member of a family that shares one mechanic (a question with a stable id, an answer control, autosave, copy-all in a fixed shape, a merge tool) and differs only in the answer control and the merged view. Build the mechanic once in `explainer-gather`; add variants as `modes/<name>.md`, each with its answer control, copy-all shape, merge view and one example.
+
+| Mode | The reader does | Answer control | Merged view for the author |
+|---|---|---|---|
+| collect (today) | Answers open questions after each chapter | Short or long text | Answers grouped by question, respondent named |
+| confirm | Reads a brief or plan and marks each chapter understood, agree, or concern, with an optional comment | Three-state choice plus text | Who has a concern where; chapters with the most concerns first |
+| choose | Picks one option per decision and gives a one-line reason | Single choice plus text | Tally per option with the reasons listed under each |
+| prioritise | Orders items or spends points across them | Drag-free ranking (up and down buttons) or a points field per item | Combined ranking with spread; items people disagree on flagged |
+| annotate | Reviews a draft (survey, interview guide, report) and comments per section | Comment pin per section, several allowed | Comments by section, by respondent |
+| check | Learns, then answers check questions and writes the idea back in one sentence | Choice with an expected answer, plus a teach-back text | Score per question; the teach-back sentences side by side. Self-explanation is one of the few interactive mechanisms the evidence ties to comprehension |
+| protocol | An interviewer follows a script and records notes per question | Long text per question, timestamp per entry | Notes per question across all interviews; this is qualitative data collection |
+| pilot | A test respondent answers a survey and says what was unclear per question | The survey's own control plus a "what was unclear" text | Clarity problems per question |
+| readout | Stakeholders read findings and react per finding | Scales for surprising and actionable, plus "what would you do" | Reactions per finding; the findings nobody would act on stand out |
+| recurring | The same questions answered on several dates | Any of the above with a date | Change over time per question |
+
+Shared rules: every question carries a stable `data-q` id so answers merge across versions and across languages; answers never leave the page except through copy, download or an optional "copy and open email" button; the merge tool accepts pasted copies and files, groups by `data-q`, and tags each respondent with language and date; exports are Markdown, JSON and CSV (the research manager's spreadsheet is the real destination). Optional: dictate an answer with the browser's speech recognition, which works in Japanese and English in Chrome.
+
+## Two languages, one page: English and Japanese
+
+The brother writes in English and then produces a Japanese version for a Japanese audience. Today the template would render Japanese in whatever system font is around and apply English rules to it. The plugin must treat language as a first-class input.
+
+**Workflow.** One source, two outputs, by a sidecar: `scripts/translate.mjs` extracts every text node of a finished page into `strings.<lang>.json` keyed by element path and question id; an agent translates the file against a project glossary (product names, terms kept in English or in katakana, consistently); the script writes the second page with `lang`, direction, fonts, number and date formats, and interface strings swapped from `assets/i18n/ui.<lang>.json`. Layout, ids and `data-q` are identical in both files, so a Japanese respondent's copied answers merge with an English respondent's by question id. Optional third output: one file with a language toggle, for mixed teams; the budget allows it because text is small.
+
+**Audience and register** are inputs to the brief, not afterthoughts: coworkers (plain business Japanese, です・ます), executives (shorter, headings may end in a noun), engineers (terms in English allowed), public or customers (the principles of やさしい日本語: short sentences, one idea, common words, furigana only here). The same page type reads differently for each.
+
+**Japanese typography in the design system** (a `:lang(ja)` block in the template, nothing else changes):
+
+| Rule | English page | Japanese page |
+|---|---|---|
+| Body face | Atkinson Hyperlegible Next | BIZ UDPGothic (a universal-design face built for legibility, on Google Fonts), falling back to Yu Gothic, Hiragino Sans, Meiryo, Noto Sans JP |
+| Heading face | Lexend | BIZ UDPGothic bold; one family for all Japanese text |
+| Code face | Atkinson Hyperlegible Mono | BIZ UDGothic (the monospaced sibling) |
+| Line height | 1.6 body, 1.15 headings | 1.75 body, 1.35 headings |
+| Measure | 62 characters | about 36 em (35 to 40 full-width characters) |
+| Letter spacing | none, headings -0.01 em | 0.03 em body, 0 headings |
+| Emphasis | bold, no italics by rule | bold or 「 」; italics forbidden, Japanese has none |
+| Line breaking | `text-wrap: pretty`, manual hyphens | `line-break: strict`, no hyphenation, `text-wrap: pretty` |
+| Numbers and dates | 1,250; 2026-10-07 | half-width digits throughout; 2026年10月7日 |
+| Interface strings | Skim mode, One chapter at a time, Done, Remember, Recap, What I need from you | ざっと読む, 1章ずつ, 完了, 覚えておく, まとめ, お願いしたいこと, from `ui.ja.json` |
+
+Offline, the system fonts above are good on Windows and macOS, so the fallback is not a degradation.
+
+**Checker by language.** The `lang` attribute is required and must match the text (a CJK-ratio check). For Japanese the limits switch from words to characters: paragraph under 90 characters, sentence under 60 (split on 。), keep-box line under 25, answer bar under 70; reading time at about 500 characters a minute; the middle-dot warning is off because ・ is ordinary punctuation; the Title Case warning is off; `font-style: italic` fails; a `:lang(ja)` font stack must be present. Mixed pages are allowed when each block carries its own `lang`.
+
+**Later, not now:** right-to-left languages need the template to move from physical to logical properties (`border-inline-start`, `padding-inline-start`) and `dir="rtl"` support. Rodrigo's PDF project already met this problem; park it with a marker in the template until a reader needs it.
+
+Plugin layout additions: `skills/explainer-gather/modes/*.md`, `scripts/translate.mjs`, `scripts/merge.html` (or the merge view inside the gather page), `assets/i18n/ui.ja.json` and `glossary.example.json`, `assets/template.html` gains the `:lang(ja)` block, `examples/` gains one English and one Japanese pair.
+
 ## Migration from today's repository
 
 1. Phase 0 from the research roadmap first (contrast tokens, glyphs, gallery synced with your skim fix), on the current layout.
 2. Move files into the plugin layout above; rewrite paths to `${CLAUDE_PLUGIN_ROOT}`; version 1.0.0; changelog.
 3. Retire double loading: either point the junction at `skills/html-explainer` or remove the junction and install the plugin from your catalog. Not both, or the skill triggers twice.
-4. Add `gather`. Your brother gets it by updating the plugin.
+4. Add `gather` with the collect mode, then the Japanese block and the translate sidecar, because the brother's two most frequent needs are those two. Other gather modes follow one at a time, each with an example. He gets each by updating the plugin.
 5. Add `atlas` with the two adapters, using FormIntact as the first regression case: the generalised pipeline must reproduce its backend atlas's inventory counts (38 routes, 23 tables, 267 columns, 19 schema files, 11 packages, 44 import edges) before it is trusted on another repository.
 6. Publish: commit the marketplace manifest to the public repo, bump the catalog package, submit to the community registry when stable.
 
@@ -106,7 +156,9 @@ Layers the type should accept from day one: backend, frontend, data, infra, whol
 |---|---|---|
 | Phase 0 fixes | Sonnet | 1 hour |
 | Plugin restructure, hook, reviewer agent, examples | Sonnet | 1 day |
-| gather skill | Sonnet | 1 day |
+| gather skill, collect mode, merge tool, exports | Sonnet | 1 day |
+| gather modes: confirm, choose, prioritise, annotate, check, protocol, pilot, readout, recurring | Sonnet | 1.5 days |
+| Japanese: `:lang(ja)` block, `ui.ja.json`, translate sidecar script, language-aware checker, glossary, example pair | Sonnet build, a Japanese-fluent review pass | 1 day |
 | atlas: inventory adapters for the two stacks, render, verify | Sonnet build, Opus review | 3 days |
 | atlas: curate step prompt and companion-skill generator | Opus or Fable for the prompt design | 1 day |
 | atlas regression against FormIntact, drift script | Sonnet | 1 day |
