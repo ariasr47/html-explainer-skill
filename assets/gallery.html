@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-type="explainer">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +9,7 @@
 <link rel="icon" href="data:,">
 <!-- Fonts are optional. The page is fully readable on the system stack if this link fails or the file is opened offline. -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&family=BIZ+UDPGothic:wght@400;700&family=BIZ+UDGothic&display=swap">
 <style>
 /* =====================================================================
    html-explainer design system  ·  v1.0
@@ -29,16 +29,18 @@
   /* text */
   --ink: #16222e;            /* body text, deep navy, never pure black */
   --ink-soft: #4a5a6a;       /* secondary text */
-  --ink-faint: #7b8a99;      /* tertiary, kickers */
+  --ink-faint: #5f6f7f;      /* tertiary, kickers */
   /* structure accent: "you are here", links, current, the answer */
   --here: #2457d6;
   --here-tint: #e3ebfb;
   /* meaning colours, used for exactly one meaning each, everywhere */
-  --go: #178a5b;   --go-tint: #dff3ea;      /* done, safe, yes */
-  --wait: #b86e00; --wait-tint: #fdf0d8;    /* in progress, caution, needs a check */
+  --go: #14784f;   --go-tint: #dff3ea;      /* done, safe, yes */
+  --wait: #9c5d00; --wait-tint: #fdf0d8;    /* in progress, caution, needs a check */
   --stop: #c43a4b; --stop-tint: #fbe3e6;    /* blocked, risk, no */
   --decide: #6d4ed8; --decide-tint: #ece6fb;/* the reader must choose */
   --memory: #fff4c2; --memory-line: #e3c45a;/* "remember this", offloaded working memory */
+  /* text that sits on a meaning fill: white on the light fills, page-dark on the dark fills, 4.5:1 or better */
+  --on-here: #ffffff; --on-go: #ffffff; --on-wait: #ffffff; --on-stop: #ffffff; --on-decide: #ffffff; --on-soft: #ffffff;
   /* type */
   --font-head: "Lexend", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
@@ -68,6 +70,7 @@
     --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
     --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
     --memory: #3a3315; --memory-line: #c9ad4a;
+    --on-here: #0e151c; --on-go: #0e151c; --on-wait: #0e151c; --on-stop: #0e151c; --on-decide: #0e151c; --on-soft: #0e151c;
     --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
   }
 }
@@ -78,6 +81,7 @@
   --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
   --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
   --memory: #3a3315; --memory-line: #c9ad4a;
+  --on-here: #0e151c; --on-go: #0e151c; --on-wait: #0e151c; --on-stop: #0e151c; --on-decide: #0e151c; --on-soft: #0e151c;
   --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
 }
 
@@ -109,9 +113,24 @@ pre code { background: none; padding: 0; }
 button { font: inherit; color: inherit; cursor: pointer; }
 img, svg { max-width: 100%; height: auto; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
-.skip { position: absolute; left: 1rem; top: -4rem; z-index: 100; padding: .5rem 1rem; background: var(--here); color: #fff; border-radius: var(--r-comp); }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 100; padding: .5rem 1rem; background: var(--here); color: var(--on-here); border-radius: var(--r-comp); }
 .skip:focus { top: 1rem; }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* ---------- 2b. Japanese: lang="ja" swaps the faces, spacing and breaking, and the few words CSS writes ---------- */
+:lang(ja) {
+  --font-head: "BIZ UDPGothic", "Yu Gothic UI", "Yu Gothic", "Hiragino Sans", "Meiryo", "Noto Sans JP", sans-serif;
+  --font-body: "BIZ UDPGothic", "Yu Gothic", "Hiragino Sans", "Meiryo", "Noto Sans JP", sans-serif;
+  --font-code: "BIZ UDGothic", "Cascadia Code", Consolas, monospace;
+  --measure: 36em;
+  line-height: 1.75; letter-spacing: .03em; line-break: strict; hyphens: none;
+}
+:lang(ja) h1, :lang(ja) h2, :lang(ja) h3, :lang(ja) h4 { letter-spacing: 0; line-height: 1.35; }
+:lang(ja) em, :lang(ja) i { font-style: normal; font-weight: 700; }
+:lang(ja) .answer { line-height: 1.5; }
+:lang(ja) .ask .choices > *[data-rec]::after { content: " · おすすめ"; }
+:lang(ja) .timeline li.here .when::before { content: "現在地 · "; }
 
 /* ---------- 3. Page frame ---------- */
 .progress { position: fixed; inset: 0 0 auto 0; height: 4px; background: var(--here); transform: scaleX(0); transform-origin: left; z-index: 60; }
@@ -127,15 +146,17 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 .rail a .dot { flex: none; width: .6rem; height: .6rem; border-radius: 50%; background: var(--line-strong); transform: translateY(-.1rem); }
 .rail a[aria-current="true"] { background: var(--here-tint); color: var(--ink); font-weight: 700; }
 .rail a[aria-current="true"] .dot { background: var(--here); }
-.rail a.done .dot { background: var(--go); }
+.rail a.done .dot, .rail a.answered .dot, body[data-finished="on"] .rail a[href="#recap"] .dot { background: var(--go); }
+.rail a.done::after, .rail a.answered::after, body[data-finished="on"] .rail a[href="#recap"]::after { content: "✓"; margin-left: auto; color: var(--go); font-weight: 700; }
 .rail .tools { display: flex; flex-wrap: wrap; gap: .5rem; padding: .25rem .6rem; }
-.rail .tools button { padding: .35rem .75rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
-.rail .tools button[aria-pressed="true"] { background: var(--here); border-color: var(--here); color: #fff; }
+.rail .tools button, .read-aloud { padding: .35rem .75rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
+.rail .tools button[aria-pressed="true"], .read-aloud[data-reading] { background: var(--here); border-color: var(--here); color: var(--on-here); }
 @media (max-width: 1099px) {
   .rail { position: sticky; top: 0; z-index: 50; margin: 0 -1rem 1.25rem; padding: .5rem 1rem; background: var(--paper); border-bottom: 1px solid var(--line); }
   .rail ol { display: flex; gap: .35rem; overflow-x: auto; margin: 0; padding-bottom: .25rem; scrollbar-width: none; }
   .rail a { white-space: nowrap; padding: .35rem .7rem; border: 1px solid var(--line); background: var(--card); }
-  .rail .tools { padding: .4rem 0 0; }
+  .rail .tools { padding: .4rem 0 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .rail .tools button { flex: none; white-space: nowrap; }
 }
 main { min-width: 0; }
 
@@ -156,7 +177,7 @@ main { min-width: 0; }
 .map { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: none; counter-reset: map; }
 .map li { margin: 0; counter-increment: map; }
 .map a { display: block; height: 100%; padding: .9rem 1rem .9rem 3.2rem; position: relative; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); color: var(--ink); text-decoration: none; }
-.map a::before { content: counter(map); position: absolute; left: 1rem; top: .85rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.map a::before { content: counter(map); position: absolute; left: 1rem; top: .85rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: var(--on-here); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
 .map a:hover { border-color: var(--here); }
 .map b { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .15rem; }
 .map span { color: var(--ink-soft); font-size: var(--size-s); }
@@ -167,6 +188,9 @@ main { min-width: 0; }
 .chapter > header .kicker { margin: 0 0 .25rem; }
 .chapter > header h2 { margin: 0; }
 .chapter > header label { flex: none; display: inline-flex; align-items: center; gap: .4rem; font-size: var(--size-s); color: var(--ink-soft); padding-top: .35rem; }
+.chapter > header > div { flex: 1; min-width: 0; }
+.chapter > header .read-aloud { flex: none; margin-top: .3rem; }
+.speaking { border-radius: 3px; box-shadow: -.35rem 0 0 var(--here), 0 0 0 .3rem var(--here-tint); }
 .chapter > header input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--go); margin: 0; }
 .from { display: flex; gap: .6rem; align-items: baseline; margin: 0 0 1.25rem; padding: .6rem .9rem; background: var(--well); border-radius: var(--r-comp); font-size: var(--size-s); color: var(--ink-soft); max-width: none; }
 .from b { color: var(--ink); font-family: var(--font-head); font-weight: 600; flex: none; }
@@ -175,6 +199,8 @@ main { min-width: 0; }
 @media (max-width: 560px) {
   .remember, .from { display: block; }
   .remember b, .from b { display: inline; margin-right: .3rem; }
+  .chapter > header { flex-wrap: wrap; }
+  .chapter > header > div { flex-basis: 100%; }
 }
 
 /* ---------- 7. Figures and diagrams ---------- */
@@ -195,20 +221,25 @@ main { min-width: 0; }
 .d-text { fill: var(--ink); font-family: var(--font-body); font-size: 15px; }
 .d-text-b { fill: var(--ink); font-family: var(--font-head); font-weight: 600; font-size: 15px; }
 .d-text-s { fill: var(--ink-soft); font-family: var(--font-body); font-size: 13px; }
-.d-num { fill: #fff; font-family: var(--font-head); font-weight: 600; font-size: 13px; }
+.d-num { fill: var(--on-here); font-family: var(--font-head); font-weight: 600; font-size: 13px; }
 .d-pin { fill: var(--here); }
 
 /* CSS flow: steps with connectors, no SVG needed */
 .flow { display: flex; flex-wrap: wrap; gap: .75rem; list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; counter-reset: flow; }
 .flow li { counter-increment: flow; flex: 1 1 150px; position: relative; padding: .8rem .9rem .8rem 2.9rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); min-height: 3.4rem; }
-.flow li::before { content: counter(flow); position: absolute; left: .8rem; top: .75rem; width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; background: var(--ink-soft); color: var(--card); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.flow li::before { content: counter(flow); position: absolute; left: .8rem; top: .75rem; width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; background: var(--ink-soft); color: var(--on-soft); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
 .flow li b { display: block; font-family: var(--font-head); font-weight: 600; }
 .flow li span { font-size: var(--size-s); color: var(--ink-soft); }
 .flow li.here { border-color: var(--here); background: var(--here-tint); }
-.flow li.here::before { background: var(--here); }
-.flow li.go { border-color: var(--go); } .flow li.go::before { background: var(--go); }
-.flow li.wait { border-color: var(--wait); } .flow li.wait::before { background: var(--wait); }
-.flow li.stop { border-color: var(--stop); } .flow li.stop::before { background: var(--stop); }
+.flow li.here::before { background: var(--here); color: var(--on-here); }
+.flow li.go { border-color: var(--go); } .flow li.go::before { background: var(--go); color: var(--on-go); }
+.flow li.wait { border-color: var(--wait); } .flow li.wait::before { background: var(--wait); color: var(--on-wait); }
+.flow li.stop { border-color: var(--stop); } .flow li.stop::before { background: var(--stop); color: var(--on-stop); }
+/* a glyph in the top-right corner, inside the padding, so state is never colour alone (the connector keeps li::after) */
+.flow li.go b::after, .flow li.wait b::after, .flow li.stop b::after { position: absolute; top: .5rem; right: .3rem; font-size: .75rem; font-weight: 700; line-height: 1; }
+.flow li.go b::after { content: "✓"; color: var(--go); }
+.flow li.wait b::after { content: "!"; color: var(--wait); }
+.flow li.stop b::after { content: "✕"; color: var(--stop); }
 @media (min-width: 700px) {
   .flow li:not(:last-child)::after { content: ""; position: absolute; right: -.75rem; top: 50%; width: .75rem; height: 2px; background: var(--line-strong); }
 }
@@ -223,12 +254,12 @@ main { min-width: 0; }
 
 .decision { margin: 1rem 0 1.5rem; padding: 1.25rem; border: 2px solid var(--decide); border-radius: var(--r-comp); background: var(--decide-tint); }
 .decision > h3 { margin: 0 0 .25rem; display: flex; gap: .6rem; align-items: center; }
-.decision > h3::before { content: "?"; flex: none; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 50%; background: var(--decide); color: #fff; font-family: var(--font-head); font-size: var(--size-0); }
+.decision > h3::before { content: "?"; flex: none; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 50%; background: var(--decide); color: var(--on-decide); font-family: var(--font-head); font-size: var(--size-0); }
 .decision > p { color: var(--ink-soft); }
 .options { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 1rem 0; }
 .option { position: relative; padding: 1rem 1.1rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); }
 .option[data-rec] { border-color: var(--go); border-width: 2.5px; }
-.option[data-rec]::after { content: attr(data-rec); position: absolute; top: -.8rem; right: .9rem; padding: .15rem .65rem; background: var(--go); color: #fff; border-radius: var(--r-chip); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.option[data-rec]::after { content: attr(data-rec); position: absolute; top: -.8rem; right: .9rem; padding: .15rem .65rem; background: var(--go); color: var(--on-go); border-radius: var(--r-chip); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
 .option h4 { margin: 0 0 .5rem; }
 .option ul { list-style: none; padding: 0; margin: 0; font-size: var(--size-s); }
 .option li { padding-left: 1.4rem; position: relative; }
@@ -242,10 +273,14 @@ main { min-width: 0; }
 .status { list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; border: 1.5px solid var(--line); border-radius: var(--r-comp); overflow: hidden; }
 .status li { display: grid; grid-template-columns: 1.1rem minmax(120px, 1fr) 2fr; gap: .9rem; align-items: baseline; padding: .7rem 1rem; background: var(--card); margin: 0; }
 .status li + li { border-top: 1px solid var(--line); }
-.status li::before { content: ""; width: .85rem; height: .85rem; border-radius: 50%; background: var(--line-strong); transform: translateY(.1rem); }
-.status li.go::before { background: var(--go); } .status li.wait::before { background: var(--wait); }
-.status li.stop::before { background: var(--stop); } .status li.decide::before { background: var(--decide); }
-.status li.here::before { background: var(--here); } .status li.memory::before { background: var(--memory-line); }
+/* each state carries a glyph as well as a colour (WCAG 1.4.1) */
+.status li::before { content: ""; display: grid; place-items: center; align-self: start; margin-top: .35rem; width: .85rem; height: .85rem; border-radius: 50%; background: var(--line-strong); font: 700 .65rem/1 var(--font-head); }
+.status li.go::before { content: "✓"; background: var(--go); color: var(--on-go); }
+.status li.wait::before { content: "!"; background: var(--wait); color: var(--on-wait); }
+.status li.stop::before { content: "✕"; background: var(--stop); color: var(--on-stop); }
+.status li.decide::before { content: "?"; background: var(--decide); color: var(--on-decide); }
+.status li.here::before { content: "●"; background: var(--here); color: var(--on-here); }
+.status li.memory::before { content: "★"; background: var(--memory-line); color: color-mix(in srgb, var(--memory-line) 15%, #000); }
 .status li b { font-family: var(--font-head); font-weight: 600; }
 .status li span { color: var(--ink-soft); font-size: var(--size-s); }
 @media (max-width: 560px) { .status li { grid-template-columns: 1.1rem 1fr; } .status li span { grid-column: 2; } }
@@ -253,8 +288,8 @@ main { min-width: 0; }
 .timeline { list-style: none; margin: 1.25rem 0 1.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; max-width: none; position: relative; }
 .timeline::before { content: ""; position: absolute; left: 0; right: 0; top: .55rem; height: 3px; background: var(--line-strong); }
 .timeline li { position: relative; padding: 1.5rem .75rem 0 0; margin: 0; }
-.timeline li::before { content: ""; position: absolute; left: 0; top: 0; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card); border: 3px solid var(--line-strong); }
-.timeline li.go::before { background: var(--go); border-color: var(--go); }
+.timeline li::before { content: ""; position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card); border: 3px solid var(--line-strong); font: 700 .6rem/1 var(--font-head); }
+.timeline li.go::before { content: "✓"; background: var(--go); border-color: var(--go); color: var(--on-go); }
 .timeline li.here::before { background: var(--here); border-color: var(--here); box-shadow: 0 0 0 5px var(--here-tint); }
 .timeline li.here .when { color: var(--here); }
 .timeline li.here .when::before { content: "You are here · "; font-weight: 700; }
@@ -263,7 +298,7 @@ main { min-width: 0; }
 
 .steps { list-style: none; margin: 1rem 0 1.5rem; padding: 0; counter-reset: step; max-width: none; }
 .steps > li { counter-increment: step; position: relative; padding: .25rem 0 .9rem 3rem; margin: 0; }
-.steps > li::before { content: counter(step); position: absolute; left: 0; top: .1rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; }
+.steps > li::before { content: counter(step); position: absolute; left: 0; top: .1rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: var(--on-here); font-family: var(--font-head); font-weight: 600; }
 .steps > li:not(:last-child)::after { content: ""; position: absolute; left: .95rem; top: 2.3rem; bottom: 0; width: 2px; background: var(--line); }
 .steps > li > b { font-family: var(--font-head); font-weight: 600; }
 
@@ -311,12 +346,16 @@ details.fold > :last-child { padding-bottom: 1rem; }
 .ask h2 { margin-bottom: .5rem; }
 .ask .choices { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .5rem; }
 .ask .choices > * { padding: .7rem 1.1rem; border-radius: var(--r-comp); border: 2px solid var(--decide); background: var(--decide-tint); color: var(--ink); font-family: var(--font-head); font-weight: 600; text-decoration: none; }
-.ask .choices > *[data-rec] { background: var(--decide); color: #fff; }
+.ask .choices > *[data-rec] { background: var(--decide); color: var(--on-decide); }
 .ask .choices > *[data-rec]::after { content: " · recommended"; font-weight: 500; opacity: .85; }
 
 /* ---------- 12. Skim mode ---------- */
-body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p),
-body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options),
+/* Components whose list or copy lives inside a div wrapper must be exempted by
+   their INNER selector, not the wrapper class: `.options` and `.split` name the
+   WRAPPER, so `ul:not(.options)` never matched the lists inside them and skim
+   mode emptied every decision card and every before/after panel. */
+body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p):not(.option .cost):not(.answer-field p):not(.view p),
+body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options):not(.option ul):not(.split ul):not(.view ul),
 body[data-skim="on"] .chapter details.fold,
 body[data-skim="on"] .chapter .term,
 body[data-skim="on"] .chapter .from { display: none; }
@@ -331,22 +370,96 @@ body[data-focus="on"] .recap:not([data-active]),
 body[data-focus="on"] .ask:not([data-active]) { display: none; }
 .focus-nav { display: none; justify-content: space-between; align-items: center; gap: 1rem; margin: 0 0 2rem; }
 body[data-focus="on"] .focus-nav { display: flex; }
-.focus-nav button { padding: .7rem 1.2rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; }
-.focus-nav button[data-next] { background: var(--here); color: #fff; }
-.focus-nav button:disabled { opacity: .4; cursor: default; }
-.focus-nav .where { color: var(--ink-soft); font-size: var(--size-s); }
+.focus-nav button, .stepper-nav button { padding: .7rem 1.2rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; }
+.focus-nav button[data-next], .stepper-nav button[data-next] { background: var(--here); color: var(--on-here); }
+.focus-nav button:disabled, .stepper-nav button[aria-disabled="true"] { opacity: .4; cursor: default; }
+.focus-nav .where, .stepper-nav .where { color: var(--ink-soft); font-size: var(--size-s); }
+
+/* ---------- 12c. Gather: answer fields and the collect bar ---------- */
+.hint { margin: 0 0 .5rem; color: var(--ink-soft); font-size: var(--size-s); max-width: none; }
+.answer-field { display: block; min-width: 0; margin: 1.25rem 0; padding: 1rem 1.1rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); background: var(--card); }
+.answer-field:focus-within { border-color: var(--here); }
+.answer-field > label:first-child, .answer-field > legend { display: block; width: 100%; padding: 0; margin: 0 0 .35rem; font-family: var(--font-head); font-weight: 600; }
+.answer-field > legend { float: left; }
+.answer-field > legend + * { clear: both; }
+.answer-field > label:not(:first-child) { display: flex; align-items: center; gap: .6rem; margin: .4rem 0; padding: .55rem .8rem; border: 1.5px solid var(--line); border-radius: var(--r-comp); cursor: pointer; }
+.answer-field > label:not(:first-child):has(:checked) { border-color: var(--here); background: var(--here-tint); }
+.answer-field[data-kind="scale"] > label:not(:first-child), .answer-field[data-kind="confirm"] > label:not(:first-child) { display: inline-flex; margin-right: .5rem; }
+.answer-field input[type="radio"], .answer-field input[type="checkbox"] { flex: none; width: 1.25rem; height: 1.25rem; margin: 0; accent-color: var(--here); }
+.answer-field textarea { display: block; width: 100%; min-height: 4.5rem; margin: .5rem 0 0; padding: .65rem .8rem; border: 1.5px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; line-height: 1.5; resize: vertical; }
+.answer-field ol { list-style: none; margin: .5rem 0 0; padding: 0; max-width: none; counter-reset: rank; }
+.answer-field ol > li { counter-increment: rank; display: flex; align-items: center; gap: .6rem; margin: .4rem 0; padding: .45rem .5rem .45rem .8rem; border: 1.5px solid var(--line); border-radius: var(--r-comp); }
+.answer-field ol > li::before { content: counter(rank); flex: none; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--ink-soft); color: var(--on-soft); font: 600 var(--size-xs) var(--font-head); }
+.answer-field ol > li > :first-child { flex: 1; }
+.answer-field ol button { flex: none; width: 2.25rem; height: 2.25rem; padding: 0; border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); background: var(--card); color: var(--ink); }
+.collect { position: fixed; left: 0; right: 0; bottom: max(.75rem, env(safe-area-inset-bottom)); z-index: 45; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; width: min(100% - 1.5rem, 46rem); margin: 0 auto; padding: .6rem .9rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); box-shadow: var(--shadow-float); }
+.collect .respondent { flex: 1 1 8rem; min-width: 0; padding: .45rem .7rem; border: 1.5px solid var(--line-strong); border-radius: 8px; background: var(--paper); color: var(--ink); font: inherit; font-size: var(--size-s); }
+.collect .count { color: var(--ink-soft); font-size: var(--size-s); white-space: nowrap; }
+.collect button { padding: .5rem .9rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); }
+.collect button[data-copy] { background: var(--here); color: var(--on-here); }
+.collect button.go::after { content: " ✓"; }
+.collect button.stop::after { content: " ✕"; }
+@media (max-width: 560px) { .collect { gap: .4rem; padding: .5rem; } .collect .count, .collect button { font-size: var(--size-xs); } .collect button { flex: 1 1 5.5rem; align-self: stretch; min-width: 0; padding: .4rem .35rem; } }
+
+/* ---------- 12d. Reader features: stepper, views, mini-map, resume, keys, finish, ruler, text size ---------- */
+html:not(.js) :is(.rail .tools, .stepper-nav, .views-tabs, .minimap, .read-aloud) { display: none; }
+html:not(.js) .view[hidden] { display: block !important; }
+html:not(.js) .stepper [data-step-text] { display: block; }
+html:not(.js) .stepper [data-step-text]::before { content: attr(data-step-text) ". "; font-weight: 700; }
+.stepper .is-dim, .minimap .is-dim { opacity: .35; }
+@media (prefers-reduced-motion: no-preference) { .stepper svg [data-steps] { transition: opacity .25s; } }
+.stepper-nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: .75rem 0 0; }
+.stepper-nav button { padding: .5rem 1rem; font-size: var(--size-s); }
+
+.views { margin: 1rem 0 1.5rem; max-width: none; }
+.views-tabs { display: flex; flex-wrap: wrap; gap: .25rem; border-bottom: 2px solid var(--line); }
+.views-tabs [role="tab"] { margin-bottom: -2px; padding: .55rem 1rem; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--ink-soft); font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); }
+.views-tabs [aria-selected="true"] { border-bottom-color: var(--here); color: var(--ink); }
+.view { padding: 1rem 0 0; }
+.view > :last-child { margin-bottom: 0; }
+
+.minimap { margin: 0 0 1.25rem; max-width: none; }
+.minimap svg { display: block; width: 100%; max-height: 140px; }
+.minimap .is-lit .d-box { fill: var(--here-tint); stroke: var(--here); stroke-width: 2.5; }
+
+.resume { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: 0 0 1.25rem; padding: .6rem .9rem; background: var(--well); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); font-size: var(--size-s); }
+.resume b { font-family: var(--font-head); font-weight: 600; }
+.resume button { padding: .3rem .85rem; border: 2px solid var(--here); border-radius: var(--r-chip); background: var(--here); color: var(--on-here); font-weight: 700; font-size: var(--size-xs); }
+.resume button[data-resume-dismiss] { margin-left: auto; padding: .1rem .55rem; border-color: transparent; background: none; color: var(--ink-soft); font-size: var(--size-0); }
+
+kbd { padding: .05em .5em; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px; background: var(--well); }
+dialog.keys { width: min(92vw, 26rem); padding: 1.25rem 1.5rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chapter); background: var(--card); color: var(--ink); }
+dialog.keys::backdrop { background: rgba(14, 21, 28, .55); }
+dialog.keys h2 { margin: 0 0 .75rem; font-size: var(--size-1); }
+dialog.keys dl { display: grid; grid-template-columns: auto 1fr; gap: .45rem 1rem; align-items: baseline; margin: 0 0 1rem; }
+dialog.keys dt, dialog.keys dd { margin: 0; }
+dialog.keys dd { color: var(--ink-soft); }
+dialog.keys form button { padding: .5rem 1.1rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--here); color: var(--on-here); font-family: var(--font-head); font-weight: 600; }
+
+.finished { display: none; align-items: center; gap: .4rem; margin: 0 0 .75rem; padding: .2rem .8rem; border: 1.5px solid var(--go); border-radius: var(--r-chip); background: var(--go-tint); font: 600 var(--size-xs) var(--font-head); }
+.finished::before { content: "✓"; color: var(--go); }
+body[data-finished="on"] .finished { display: inline-flex; }
+
+/* reading ruler: inside the chapter under the pointer or focus, only that block keeps full strength */
+body[data-ruler="on"] .chapter:is(:hover, :has(:is(p, li, figure, .flow, .status, .split, .decision):focus-within)) :is(p, li, figure, .flow, .status, .split, .decision):not(:is(.flow, .status, .split, .decision, header) *, :hover, :focus-within) { opacity: .45; }
+@media (prefers-reduced-motion: no-preference) { body[data-ruler="on"] .chapter :is(p, li, figure, .flow, .status, .split, .decision) { transition: opacity .15s; } }
+
+html[data-size="lg"] { font-size: 20px; }
+html[data-size="xl"] { font-size: 22px; }
+html[data-size="lg"] button[data-size]::after { content: " +"; }
+html[data-size="xl"] button[data-size]::after { content: " ++"; }
 
 /* ---------- 13. Print ---------- */
 @media print {
   :root { --paper: #fff; --card: #fff; }
-  html { font-size: 11pt; }
+  html, html[data-size] { font-size: 11pt; }
   .page { display: block; width: auto; padding: 0; }
-  .rail, .progress, .skip, .chapter > header label { display: none !important; }
+  .rail, .progress, .skip, .chapter > header label, .read-aloud, .collect, .resume, .stepper-nav, .views-tabs { display: none !important; }
   .chapter { break-inside: avoid; border-color: #bbb; box-shadow: none; }
   details.fold { break-inside: avoid; }
   details.fold[open] > summary::before, details.fold > summary::before { display: none; }
   a { color: inherit; text-decoration: none; }
-  .figure { break-inside: avoid; }
+  .figure, .answer-field { break-inside: avoid; }
 }
 </style>
 </head>
@@ -363,12 +476,16 @@ body[data-focus="on"] .focus-nav { display: flex; }
       <li><a href="#decide"><span class="dot"></span>When you must decide</a></li>
       <li><a href="#standing"><span class="dot"></span>Where things stand</a></li>
       <li><a href="#words"><span class="dot"></span>Words and machinery</a></li>
+      <li><a href="#gather"><span class="dot"></span>Ask and collect</a></li>
       <li><a href="#recap"><span class="dot"></span>Recap</a></li>
     </ol>
     <div class="tools">
       <button type="button" data-skim aria-pressed="false">Skim mode</button>
       <button type="button" data-focus aria-pressed="false">One chapter at a time</button>
+      <button type="button" data-ruler aria-pressed="false">Reading ruler</button>
+      <button type="button" data-size>Text size</button>
       <button type="button" data-theme-toggle>Dark / light</button>
+      <button type="button" data-keys>Keys</button>
     </div>
   </nav>
 
@@ -376,7 +493,7 @@ body[data-focus="on"] .focus-nav { display: flex; }
     <div class="focus-nav" aria-live="polite"><button type="button" data-prev>Previous</button><span class="where"></span><button type="button" data-next>Next</button></div>
     <p class="kicker">The visual system behind every explainer, shown with itself</p>
     <h1>How an explainer is built</h1>
-    <div class="meta"><span>Reading time about 6 minutes</span><span>Version 1.0, 2026-09-16</span><span>For: anyone writing or reading one</span></div>
+    <div class="meta"><span>Reading time about 7 minutes</span><span>Version 1.0, 2026-10-07</span><span>For: anyone writing or reading one</span></div>
 
     <p class="answer">An explainer is a page you can skim in a minute and still get the point: the answer comes first, colour has one meaning, every chapter has a picture, and the page remembers so you do not have to.</p>
 
@@ -396,14 +513,28 @@ body[data-focus="on"] .focus-nav { display: flex; }
       <li><a href="#decide"><b>When you must decide</b><span>How a decision is laid out so choosing takes a minute.</span></a></li>
       <li><a href="#standing"><b>Where things stand</b><span>Timelines, status boards and the few numbers that matter.</span></a></li>
       <li><a href="#words"><b>Words and machinery</b><span>Plain words in the reading path, exact details in folds.</span></a></li>
+      <li><a href="#gather"><b>Ask and collect</b><span>Questions you answer on the page, saved on your device.</span></a></li>
     </ol>
 
     <!-- ============ 1 ============ -->
     <section class="chapter" id="memory" data-keep="You can hold about three things. The page holds the rest.">
       <header>
-        <div><p class="kicker">Chapter 1 of 6</p><h2>Your working memory is the limit, so the page carries the load</h2></div>
+        <div><p class="kicker">Chapter 1 of 7, about 2 minutes</p><h2>Your working memory is the limit, so the page carries the load</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="memory">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-memory"><title id="mm-memory">Page map: you are in chapter 1 of 7, Memory</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> the answer at the top said the page remembers things so you do not have to. This chapter shows how.</p>
 
@@ -434,15 +565,38 @@ body[data-focus="on"] .focus-nav { display: flex; }
         <p>Working memory research puts the practical span at three to four items for most adults, lower under stress or with ADHD. Three is the safe number. One colour for all memory devices means one association to learn instead of four.</p>
       </details>
 
+      <details class="fold"><summary>Show the reading controls</summary>
+        <ul>
+          <li><b>Read aloud</b> reads one chapter, one block at a time. It appears when your browser can speak.</li>
+          <li><b>Reading ruler</b> keeps the block under your pointer clear and fades the rest of the chapter.</li>
+          <li><b>Text size</b> steps through normal, large and extra large.</li>
+          <li><b>Keys</b> lists the shortcuts: J and K change chapter, F, S, D and R switch the modes.</li>
+          <li>When you come back, the page offers to continue where you stopped. When every chapter is done, it says so.</li>
+        </ul>
+      </details>
+
       <p class="remember"><b>Remember:</b> anything yellow is something the page is holding for you; you can stop holding it.</p>
     </section>
 
     <!-- ============ 2 ============ -->
     <section class="chapter" id="colour" data-keep="Six colours. Each means exactly one thing, everywhere.">
       <header>
-        <div><p class="kicker">Chapter 2 of 6</p><h2>Colour means one thing, and never decorates</h2></div>
+        <div><p class="kicker">Chapter 2 of 7, about 2 minutes</p><h2>Colour means one thing, and never decorates</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="colour">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-colour"><title id="mm-colour">Page map: you are in chapter 2 of 7, Colour</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> yellow is the page holding something for you. Five more colours carry meaning the same way.</p>
 
@@ -457,6 +611,8 @@ body[data-focus="on"] .focus-nav { display: flex; }
         <li class="memory"><b>Yellow</b><span>Held for you: keep box, remember lines, recap.</span></li>
       </ul>
 
+      <p>Each dot also carries a symbol, so colour never works alone.</p>
+
       <p>Callouts use the same three meaning colours, and only when they change what you should do next.</p>
 
       <div class="callout tip"><b>Tip</b><p>A tip is something that makes the next step easier. If it does not change what you do, it is not a tip and it is not on the page.</p></div>
@@ -469,27 +625,49 @@ body[data-focus="on"] .focus-nav { display: flex; }
     <!-- ============ 3 ============ -->
     <section class="chapter" id="diagrams" data-keep="A picture replaces a paragraph. It never repeats one.">
       <header>
-        <div><p class="kicker">Chapter 3 of 6</p><h2>Show the relationship instead of describing it</h2></div>
+        <div><p class="kicker">Chapter 3 of 7, about 1 minute</p><h2>Show the relationship instead of describing it</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="diagrams">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-diagrams"><title id="mm-diagrams">Page map: you are in chapter 3 of 7, Pictures</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> colour is used only for meaning. Diagrams use the same six colours, and the same rule.</p>
 
       <p>A paragraph that describes a branch makes you hold both branches in your head. A diagram puts them on the screen side by side. That is the whole reason to draw one.</p>
 
-      <figure class="figure">
+      <figure class="figure stepper" data-step="1">
         <svg viewBox="0 0 800 300" role="img" aria-labelledby="fig-branch"><title id="fig-branch">A request either stops at a gate or goes through, drawn as a branch</title>
           <rect class="d-box" x="20" y="120" width="200" height="60" rx="10"/><text class="d-text-b" x="120" y="156" text-anchor="middle">Request arrives</text>
           <path class="d-line" d="M220 150 H290"/><path class="d-arrow" d="M290 144 L302 150 L290 156 Z"/>
           <rect class="d-box-decide" x="302" y="120" width="200" height="60" rx="10"/><text class="d-text-b" x="402" y="156" text-anchor="middle">Allowed?</text>
-          <path class="d-line" d="M502 150 H540 V60 H570"/><path class="d-arrow" d="M570 54 L582 60 L570 66 Z"/>
-          <text class="d-text-s" x="545" y="100" text-anchor="middle">no</text>
-          <rect class="d-box-stop" x="582" y="30" width="200" height="60" rx="10"/><text class="d-text-b" x="682" y="66" text-anchor="middle">Clear message, stop</text>
-          <path class="d-line" d="M502 150 H540 V240 H570"/><path class="d-arrow" d="M570 234 L582 240 L570 246 Z"/>
-          <text class="d-text-s" x="545" y="200" text-anchor="middle">yes</text>
-          <rect class="d-box-go" x="582" y="210" width="200" height="60" rx="10"/><text class="d-text-b" x="682" y="246" text-anchor="middle">Goes through</text>
+          <g data-steps="1,2">
+            <path class="d-line" d="M502 150 H540 V60 H570"/><path class="d-arrow" d="M570 54 L582 60 L570 66 Z"/>
+            <text class="d-text-s" x="545" y="100" text-anchor="middle">no</text>
+            <rect class="d-box-stop" x="582" y="30" width="200" height="60" rx="10"/><text class="d-text-b" x="682" y="66" text-anchor="middle">Clear message, stop</text>
+          </g>
+          <g data-steps="1,3">
+            <path class="d-line" d="M502 150 H540 V240 H570"/><path class="d-arrow" d="M570 234 L582 240 L570 246 Z"/>
+            <text class="d-text-s" x="545" y="200" text-anchor="middle">yes</text>
+            <rect class="d-box-go" x="582" y="210" width="200" height="60" rx="10"/><text class="d-text-b" x="682" y="246" text-anchor="middle">Goes through</text>
+          </g>
         </svg>
-        <figcaption class="take"><b>Take from this:</b> there are only two outcomes, and the reader sees both at once instead of holding one while reading about the other.</figcaption>
+        <figcaption class="take"><b>Take from this:</b>
+          <span data-step-text="1">there are only two outcomes, and the reader sees both at once instead of holding one while reading about the other.</span>
+          <span data-step-text="2">No: the request stops at the gate with a clear message.</span>
+          <span data-step-text="3">Yes: the request goes through.</span>
+        </figcaption>
+        <div class="stepper-nav"><button type="button" data-prev>Previous</button><span class="where"></span><button type="button" data-next>Next</button></div>
       </figure>
 
       <p>Most relationships do not need a drawn diagram. A sequence is a flow. Two states of one thing are a split.</p>
@@ -515,9 +693,22 @@ body[data-focus="on"] .focus-nav { display: flex; }
     <!-- ============ 4 ============ -->
     <section class="chapter" id="decide" data-keep="One question, few options, the recommended one marked, and what happens if you do nothing.">
       <header>
-        <div><p class="kicker">Chapter 4 of 6</p><h2>When you must decide, the page lays the choice out for you</h2></div>
+        <div><p class="kicker">Chapter 4 of 7, about 2 minutes</p><h2>When you must decide, the page lays the choice out for you</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="decide">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-decide"><title id="mm-decide">Page map: you are in chapter 4 of 7, Decide</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> purple means "you must choose". This chapter shows what a purple card contains.</p>
 
@@ -560,9 +751,22 @@ body[data-focus="on"] .focus-nav { display: flex; }
     <!-- ============ 5 ============ -->
     <section class="chapter" id="standing" data-keep="Timeline for where you are in time, status board for how things are, tiles for the few numbers that matter.">
       <header>
-        <div><p class="kicker">Chapter 5 of 6</p><h2>Where things stand, shown in three shapes</h2></div>
+        <div><p class="kicker">Chapter 5 of 7, about 1 minute</p><h2>Where things stand, shown in three shapes</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="standing">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-standing"><title id="mm-standing">Page map: you are in chapter 5 of 7, Standing</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> colour has one meaning. Status shapes reuse green, amber, red and cobalt and add nothing new.</p>
 
@@ -594,9 +798,22 @@ body[data-focus="on"] .focus-nav { display: flex; }
     <!-- ============ 6 ============ -->
     <section class="chapter" id="words" data-keep="Plain words in the reading path. Exact names, commands and numbers in folds.">
       <header>
-        <div><p class="kicker">Chapter 6 of 6</p><h2>Plain words on the path, machinery in the folds</h2></div>
+        <div><p class="kicker">Chapter 6 of 7, about 2 minutes</p><h2>Plain words on the path, machinery in the folds</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
         <label><input type="checkbox" data-done> Done</label>
       </header>
+
+      <figure class="minimap" data-lit="words">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-words"><title id="mm-words">Page map: you are in chapter 6 of 7, Words</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
 
       <p class="from"><b>Before this:</b> every device so far reduces what you must hold. Words are the last place that load hides.</p>
 
@@ -610,8 +827,21 @@ body[data-focus="on"] .focus-nav { display: flex; }
 
       <p>Everything exact lives in a fold: commands, file paths, hashes, tables. The page must make sense with every fold closed, so opening one is always optional.</p>
 
+      <p>One fact, at three depths.</p>
+
+      <div class="views">
+        <div class="views-tabs" role="tablist">
+          <button type="button" role="tab" data-view-tab="plain" aria-selected="true">Plain</button>
+          <button type="button" role="tab" data-view-tab="exact" aria-selected="false">Exact</button>
+          <button type="button" role="tab" data-view-tab="code" aria-selected="false">Code</button>
+        </div>
+        <div class="view" data-view-panel="plain"><p>The page remembers what you typed.</p></div>
+        <div class="view" data-view-panel="exact" hidden><p>Each answer is stored in this browser, under the page address.</p></div>
+        <div class="view" data-view-panel="code" hidden><p><code>localStorage["explainer:/page:answers"]</code></p></div>
+      </div>
+
       <details class="fold"><summary>Show the checker command</summary>
-        <pre><code>node ~/.claude/skills/html-explainer/scripts/check.mjs docs/explainers/2026-09-16-topic.html</code></pre>
+        <pre><code>node &lt;plugin folder&gt;/scripts/check.mjs docs/explainers/2026-10-07-topic.html</code></pre>
         <p>Exit code 0 means every hard rule passed. It fails a page for a missing answer bar, a chapter without a visual, a paragraph over forty words, an external script, or an SVG without a title.</p>
       </details>
 
@@ -623,6 +853,94 @@ body[data-focus="on"] .focus-nav { display: flex; }
       <p class="remember"><b>Remember:</b> if you hit a hard word or a wall of detail in the reading path, the page is wrong, not you.</p>
     </section>
 
+    <!-- ============ 7 ============ -->
+    <section class="chapter" id="gather" data-keep="Each question is a field. Your answers stay on this device until you copy them.">
+      <header>
+        <div><p class="kicker">Chapter 7 of 7, about 1 minute</p><h2>Questions get answered on the page, and the answers stay with you</h2></div>
+        <button type="button" class="read-aloud" data-read>Read aloud</button>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <figure class="minimap" data-lit="gather">
+        <svg viewBox="0 0 700 64" role="img" aria-labelledby="mm-gather"><title id="mm-gather">Page map: you are in chapter 7 of 7, Ask</title>
+          <g data-node="memory"><rect class="d-box" x="4" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="50" y="38" text-anchor="middle">Memory</text></g>
+          <g data-node="colour"><rect class="d-box" x="104" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="150" y="38" text-anchor="middle">Colour</text></g>
+          <g data-node="diagrams"><rect class="d-box" x="204" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="250" y="38" text-anchor="middle">Pictures</text></g>
+          <g data-node="decide"><rect class="d-box" x="304" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="350" y="38" text-anchor="middle">Decide</text></g>
+          <g data-node="standing"><rect class="d-box" x="404" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="450" y="38" text-anchor="middle">Standing</text></g>
+          <g data-node="words"><rect class="d-box" x="504" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="550" y="38" text-anchor="middle">Words</text></g>
+          <g data-node="gather"><rect class="d-box" x="604" y="10" width="92" height="44" rx="8"/><text class="d-text-b" x="650" y="38" text-anchor="middle">Ask</text></g>
+        </svg>
+      </figure>
+
+      <p class="from"><b>Before this:</b> purple means you must choose. A question field is where you do it.</p>
+
+      <p>Some pages ask you things. Answer, and the page saves it on this device. A bar at the bottom then offers to copy or download.</p>
+
+      <div class="answer-field" data-q="demo-text">
+        <label for="demo-text">What would make this page easier for you to read?</label>
+        <p class="hint">One sentence is enough.</p>
+        <textarea id="demo-text" rows="3"></textarea>
+      </div>
+
+      <fieldset class="answer-field" data-q="demo-choice" data-kind="choice">
+        <legend>Should every new page start from this system?</legend>
+        <label><input type="radio" name="demo-choice" value="Yes"> Yes</label>
+        <label><input type="radio" name="demo-choice" value="Not yet"> Not yet</label>
+        <textarea id="demo-choice-why" rows="2" aria-label="Why"></textarea>
+      </fieldset>
+
+      <ol class="flow">
+        <li class="go"><b>Explain and ask</b><span>Author</span></li>
+        <li class="here"><b>Type</b><span>You</span></li>
+        <li><b>Copy</b><span>You</span></li>
+        <li><b>Merge</b><span>Author</span></li>
+      </ol>
+
+      <details class="fold"><summary>Show the markup for the other kinds</summary>
+        <p>The default kind is text. Set data-kind for the rest. Every field needs a stable data-q.</p>
+        <pre><code>&lt;!-- multi: checkboxes, several answers; the textarea is an optional reason --&gt;
+&lt;fieldset class="answer-field" data-q="q3" data-kind="multi"&gt;
+  &lt;legend&gt;Which parts need work?&lt;/legend&gt;
+  &lt;label&gt;&lt;input type="checkbox" value="Intro"&gt; Intro&lt;/label&gt;
+  &lt;label&gt;&lt;input type="checkbox" value="Method"&gt; Method&lt;/label&gt;
+  &lt;textarea id="q3-why" rows="2" aria-label="Why"&gt;&lt;/textarea&gt;
+&lt;/fieldset&gt;
+
+&lt;!-- scale: radios 1 to 5 --&gt;
+&lt;fieldset class="answer-field" data-q="q4" data-kind="scale"&gt;
+  &lt;legend&gt;How clear is this page?&lt;/legend&gt;
+  &lt;p class="hint"&gt;1 is unclear, 5 is clear.&lt;/p&gt;
+  &lt;label&gt;&lt;input type="radio" name="q4" value="1"&gt; 1&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q4" value="2"&gt; 2&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q4" value="3"&gt; 3&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q4" value="4"&gt; 4&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q4" value="5"&gt; 5&lt;/label&gt;
+&lt;/fieldset&gt;
+
+&lt;!-- rank: the reader moves items, the order is the answer; the li text, without the buttons, is the item --&gt;
+&lt;fieldset class="answer-field" data-q="q5" data-kind="rank"&gt;
+  &lt;legend&gt;Put these in order, most important first.&lt;/legend&gt;
+  &lt;ol&gt;
+    &lt;li&gt;&lt;span&gt;Speed&lt;/span&gt;&lt;button type="button" data-up aria-label="Move up"&gt;↑&lt;/button&gt;&lt;button type="button" data-down aria-label="Move down"&gt;↓&lt;/button&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span&gt;Cost&lt;/span&gt;&lt;button type="button" data-up aria-label="Move up"&gt;↑&lt;/button&gt;&lt;button type="button" data-down aria-label="Move down"&gt;↓&lt;/button&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span&gt;Safety&lt;/span&gt;&lt;button type="button" data-up aria-label="Move up"&gt;↑&lt;/button&gt;&lt;button type="button" data-down aria-label="Move down"&gt;↓&lt;/button&gt;&lt;/li&gt;
+  &lt;/ol&gt;
+&lt;/fieldset&gt;
+
+&lt;!-- confirm: understood, agree or concern, plus a comment --&gt;
+&lt;fieldset class="answer-field" data-q="q6" data-kind="confirm"&gt;
+  &lt;legend&gt;Is this chapter clear and acceptable?&lt;/legend&gt;
+  &lt;label&gt;&lt;input type="radio" name="q6" value="understood"&gt; Understood&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q6" value="agree"&gt; Agree&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="q6" value="concern"&gt; Concern&lt;/label&gt;
+  &lt;textarea id="q6-why" rows="2" aria-label="Comment"&gt;&lt;/textarea&gt;
+&lt;/fieldset&gt;</code></pre>
+      </details>
+
+      <p class="remember"><b>Remember:</b> your answers stay on your device until you copy or download them.</p>
+    </section>
+
     <section class="recap" id="recap">
       <h2>Recap</h2>
       <ol>
@@ -632,6 +950,7 @@ body[data-focus="on"] .focus-nav { display: flex; }
         <li>A purple card always tells you the recommended option and what happens if you ignore it.</li>
         <li>The cobalt dot on a timeline is today; the colour of a status dot is the whole status.</li>
         <li>If you hit a hard word or a wall of detail in the reading path, the page is wrong, not you.</li>
+        <li>Your answers stay on your device until you copy or download them.</li>
       </ol>
     </section>
 
@@ -641,94 +960,258 @@ body[data-focus="on"] .focus-nav { display: flex; }
       <div class="choices"><a href="#memory" data-rec>Yes, adopt it</a><a href="#colour">Adopt it with changes</a><a href="#diagrams">Show me one on a real topic first</a></div>
       <p class="nothing"><b>If you do nothing:</b> the skill is installed and will be used the next time you ask for an html explainer.</p>
     </section>
+
+    <!-- The collect bar of a gather page sits here, outside the chapters, so one-chapter mode never hides it. It stays hidden until a field has an answer. -->
+    <div class="collect" hidden>
+      <input class="respondent" type="text" placeholder="Your name (optional)" aria-label="Your name">
+      <span class="count"></span>
+      <button type="button" data-copy>Copy all answers</button>
+      <button type="button" data-download>Download .md</button>
+      <button type="button" data-json>Copy JSON</button>
+    </div>
   </main>
 </div>
 
 <script>
 /* Optional behaviour. The page reads fine with JavaScript off. */
-(function () {
-  'use strict';
-  var d = document, root = d.documentElement, body = d.body;
-  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-                set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
-  var key = 'explainer:' + (location.pathname || 'page');
+(() => {
+'use strict';
+const d = document, root = d.documentElement, body = d.body;
+const $ = (s, r = d) => r?.querySelector(s), qa = (s, r = d) => [...r.querySelectorAll(s)];
+const on = (e, ev, f) => e?.addEventListener(ev, f);
+const byId = id => id ? d.getElementById(id) : null;
+const txt = e => e.textContent.replace(/\s+/g, ' ').trim();
+const esc = s => s.replace(/[&<>"]/g, c => '&#' + c.charCodeAt(0) + ';');
+const make = (tag, cls, html) => { const e = d.createElement(tag); e.className = cls; e.innerHTML = html; return e; };
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+const key = 'explainer:' + (location.pathname || 'page');
+root.classList.add('js');
 
-  /* theme */
-  var saved = store.get('explainer:theme'); if (saved) root.setAttribute('data-theme', saved);
-  var tt = d.querySelector('[data-theme-toggle]');
-  if (tt) tt.addEventListener('click', function () {
-    var dark = root.getAttribute('data-theme') === 'dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
-    var next = dark ? 'light' : 'dark'; root.setAttribute('data-theme', next); store.set('explainer:theme', next);
-  });
+/* Strings the script writes itself, English and Japanese. All other text is markup, which translate.mjs reaches. */
+const T = {
+  en: { of: '{n} of {m}', step: '{n} of {m}', ans: '{n} of {m} answered', head: 'answers from {name} on {date}', anon: 'anonymous', none: 'Not answered',
+        read: 'Read aloud', stop: 'Stop', cont: 'Continue from', go: 'Go', no: 'Dismiss', keys: 'Keys', next: 'Next chapter', prev: 'Previous chapter', close: 'Close', fin: 'All chapters done' },
+  ja: { of: '{m}章中 第{n}章', step: '{n} / {m}', ans: '{m}問中 {n}問 回答済み', head: '{name} の回答（{date}）', anon: '匿名', none: '未回答',
+        read: '読み上げ', stop: '停止', cont: '続きから：', go: '移動', no: '閉じる', keys: 'キー操作', next: '次の章', prev: '前の章', close: '閉じる', fin: 'すべての章を完了' }
+};
+const L = T[(root.lang || '').slice(0, 2).toLowerCase()] || T.en;
+const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]);
 
-  /* skim mode */
-  var sk = d.querySelector('[data-skim]');
-  if (sk) sk.addEventListener('click', function () {
-    var on = body.getAttribute('data-skim') !== 'on';
-    body.setAttribute('data-skim', on ? 'on' : 'off'); sk.setAttribute('aria-pressed', String(on));
-  });
+/* theme and text size */
+const tt = $('[data-theme-toggle]'), sk = $('[data-skim]'), ru = $('[data-ruler]'), fb = $('[data-focus]'), sizes = ['', 'lg', 'xl'];
+if (store.get('explainer:theme')) root.dataset.theme = store.get('explainer:theme');
+on(tt, 'click', () => store.set('explainer:theme', root.dataset.theme = (root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark' ? 'light' : 'dark'));
+root.dataset.size = store.get('explainer:size') || '';
+on($('button[data-size]'), 'click', () => store.set('explainer:size', root.dataset.size = sizes[(sizes.indexOf(root.dataset.size) + 1) % 3]));
 
-  /* focus mode: one chapter at a time, reader paced */
-  var fb = d.querySelector('[data-focus]');
-  var parts = [].slice.call(d.querySelectorAll('.chapter, .recap, .ask'));
-  var nav = d.querySelector('.focus-nav'), idx = 0;
-  function showPart(i) {
-    idx = Math.max(0, Math.min(parts.length - 1, i));
-    parts.forEach(function (p, n) { if (n === idx) p.setAttribute('data-active', ''); else p.removeAttribute('data-active'); });
-    if (nav) {
-      nav.querySelector('[data-prev]').disabled = idx === 0;
-      nav.querySelector('[data-next]').disabled = idx === parts.length - 1;
-      var h = parts[idx].querySelector('h2'); nav.querySelector('.where').textContent = (idx + 1) + ' of ' + parts.length + (h ? ': ' + h.textContent : '');
-    }
-    if (body.getAttribute('data-focus') === 'on') { var top = nav ? nav.getBoundingClientRect().top + scrollY - 8 : 0; scrollTo(0, top); }
+/* skim, ruler and one-chapter modes: on or off on <body>; the ruler is remembered */
+const flip = (btn, attr, k, then) => {
+  if (!btn) return;
+  const set = s => { body.setAttribute(attr, s ? 'on' : 'off'); btn.setAttribute('aria-pressed', s); then?.(s); };
+  if (k && store.get(k) === 'on') set(true);
+  on(btn, 'click', () => { const s = body.getAttribute(attr) !== 'on'; set(s); k && store.set(k, s ? 'on' : 'off'); });
+};
+const parts = qa('.chapter, .recap, .ask'), nav = $('.focus-nav'), [pv, nx] = ['prev', 'next'].map(k => $('[data-' + k + ']', nav));
+let idx = 0, current;
+const focused = () => body.dataset.focus === 'on';
+const showPart = i => {
+  idx = Math.max(0, Math.min(parts.length - 1, i));
+  parts.forEach((p, n) => p.toggleAttribute('data-active', n === idx));
+  if (nav) {
+    pv.disabled = idx === 0; nx.disabled = idx === parts.length - 1;
+    const h = $('h2', parts[idx]); $('.where', nav).textContent = fmt(L.of, { n: idx + 1, m: parts.length }) + (h ? ': ' + h.textContent : '');
   }
-  if (fb && parts.length) {
-    fb.addEventListener('click', function () {
-      var on = body.getAttribute('data-focus') !== 'on';
-      body.setAttribute('data-focus', on ? 'on' : 'off'); fb.setAttribute('aria-pressed', String(on));
-      if (on) { var cur = parts.findIndex(function (p) { return p.getBoundingClientRect().bottom > 120; }); showPart(cur < 0 ? 0 : cur); }
+  if (focused()) scrollTo(0, nav ? nav.getBoundingClientRect().top + scrollY - 8 : 0);
+};
+const jump = e => { const n = parts.indexOf(e); if (n >= 0) focused() ? showPart(n) : e.scrollIntoView(); };
+flip(sk, 'data-skim'); flip(ru, 'data-ruler', 'explainer:ruler');
+if (parts.length) {
+  flip(fb, 'data-focus', 0, s => { if (s) showPart(Math.max(0, parts.findIndex(p => p.getBoundingClientRect().bottom > 120))); });
+  on(pv, 'click', () => showPart(idx - 1)); on(nx, 'click', () => showPart(idx + 1));
+  on(d, 'click', e => {
+    const a = focused() && e.target.closest?.('.rail a[href^="#"], .map a[href^="#"]');
+    const n = a ? parts.indexOf(byId(a.getAttribute('href').slice(1))) : -1;
+    if (n >= 0) { e.preventDefault(); showPart(n); }
+  });
+}
+
+/* progress bar */
+const pbar = $('.progress'), progress = () => { const h = root.scrollHeight - innerHeight; if (pbar) pbar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')'; };
+addEventListener('scroll', progress, { passive: true }); addEventListener('resize', progress); progress();
+
+/* resume: offer the chapter the reader was last in */
+const last = byId(store.get(key + ':last')), head = $('.answer');
+if (last && head && last !== $('.chapter')) {
+  const rc = make('div', 'resume', esc(L.cont) + ' <b>' + esc(txt($('h2', last) || last)) + '</b> <button type="button">' + L.go + '</button><button type="button" aria-label="' + L.no + '">×</button>');
+  const [go, x] = qa('button', rc); go.dataset.resume = x.dataset.resumeDismiss = '';
+  on(go, 'click', () => { rc.remove(); jump(last); }); on(x, 'click', () => rc.remove());
+  head.after(rc);
+}
+
+/* current chapter in the rail, remembered for resume */
+const links = qa('.rail a[href^="#"]'), targets = links.map(a => byId(a.getAttribute('href').slice(1))).filter(Boolean);
+if (window.IntersectionObserver && targets.length) {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) current = e.target; });
+    links.forEach(a => a.setAttribute('aria-current', !!current && a.getAttribute('href') === '#' + current.id));
+    if (current) store.set(key + ':last', current.id);
+  }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+  targets.forEach(t => io.observe(t));
+}
+
+/* done boxes, remembered per page; all checked sets the finish state */
+let done = {}; try { done = JSON.parse(store.get(key + ':done')) || {}; } catch (e) {}
+const boxes = qa('.chapter input[data-done]'), finish = () => { body.dataset.finished = boxes.length && boxes.every(b => b.checked) ? 'on' : 'off'; };
+$('.recap h2')?.after(make('span', 'finished', L.fin));
+boxes.forEach(box => {
+  const c = box.closest('.chapter'), link = $('.rail a[href="#' + c.id + '"]'), paint = () => link?.classList.toggle('done', box.checked);
+  box.checked = !!done[c.id]; paint();
+  on(box, 'change', () => { done[c.id] = box.checked; store.set(key + ':done', JSON.stringify(done)); paint(); finish(); });
+});
+finish();
+
+/* stepper: dim what is not lit on this step, show this step's text */
+qa('.stepper').forEach(f => {
+  const tx = qa('[data-step-text]', f), sn = $('.stepper-nav', f), w = $('.where', sn), [a, b] = ['prev', 'next'].map(k => $('[data-' + k + ']', sn));
+  const show = i => {
+    const s = Math.max(1, Math.min(tx.length, i)); f.dataset.step = s;
+    qa('[data-steps]', f).forEach(e => e.classList.toggle('is-dim', !e.dataset.steps.split(/\s*,\s*/).includes('' + s)));
+    tx.forEach(t => { t.hidden = +t.dataset.stepText !== s; });
+    if (w) w.textContent = fmt(L.step, { n: s, m: tx.length });
+    a?.setAttribute('aria-disabled', s < 2); b?.setAttribute('aria-disabled', s >= tx.length);
+  };
+  on(a, 'click', () => show(f.dataset.step - 1)); on(b, 'click', () => show(+f.dataset.step + 1));
+  f.tabIndex = 0;
+  on(f, 'keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); show(+f.dataset.step + (e.key === 'ArrowRight' ? 1 : -1)); } });
+  sn?.setAttribute('aria-live', 'polite'); show(+f.dataset.step || 1);
+});
+
+/* perspectives tabs: the first panel is visible without script */
+qa('.views').forEach(v => {
+  const tabs = qa('[data-view-tab]', v), panels = qa('[data-view-panel]', v);
+  const pick = (t, focus) => {
+    tabs.forEach(x => { x.setAttribute('aria-selected', x === t); x.tabIndex = x === t ? 0 : -1; });
+    panels.forEach(p => { p.hidden = p.dataset.viewPanel !== t.dataset.viewTab; });
+    if (focus) t.focus();
+  };
+  tabs.forEach((t, i) => {
+    on(t, 'click', () => pick(t));
+    on(t, 'keydown', e => {
+      const j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (j !== undefined) { e.preventDefault(); pick(tabs[(j + tabs.length) % tabs.length], 1); }
     });
-    if (nav) {
-      nav.querySelector('[data-prev]').addEventListener('click', function () { showPart(idx - 1); });
-      nav.querySelector('[data-next]').addEventListener('click', function () { showPart(idx + 1); });
-    }
-    d.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('.rail a[href^="#"], .map a[href^="#"]');
-      if (!a || body.getAttribute('data-focus') !== 'on') return;
-      var t = d.getElementById(a.getAttribute('href').slice(1)); var n = parts.indexOf(t);
-      if (n >= 0) { e.preventDefault(); showPart(n); }
-    });
-  }
-
-  /* progress bar */
-  var bar = d.querySelector('.progress');
-  function progress() {
-    if (!bar) return; var h = root.scrollHeight - innerHeight;
-    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')';
-  }
-  addEventListener('scroll', progress, { passive: true }); addEventListener('resize', progress); progress();
-
-  /* current chapter in the rail */
-  var links = [].slice.call(d.querySelectorAll('.rail a[href^="#"]'));
-  var targets = links.map(function (a) { return d.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
-  if ('IntersectionObserver' in window && targets.length) {
-    var current = null;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) current = e.target; });
-      links.forEach(function (a) { a.setAttribute('aria-current', current && a.getAttribute('href') === '#' + current.id ? 'true' : 'false'); });
-    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
-    targets.forEach(function (t) { io.observe(t); });
-  }
-
-  /* done checkboxes, remembered per page */
-  var done = {}; try { done = JSON.parse(store.get(key + ':done') || '{}'); } catch (e) {}
-  [].slice.call(d.querySelectorAll('.chapter')).forEach(function (c) {
-    var box = c.querySelector('input[data-done]'); if (!box) return;
-    var link = d.querySelector('.rail a[href="#' + c.id + '"]');
-    function paint() { if (link) link.classList.toggle('done', box.checked); }
-    box.checked = !!done[c.id]; paint();
-    box.addEventListener('change', function () { done[c.id] = box.checked; store.set(key + ':done', JSON.stringify(done)); paint(); });
   });
+  if (tabs.length) pick(tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0]);
+});
+
+/* mini-map: light this chapter's node, dim the rest */
+qa('.minimap').forEach(m => qa('[data-node]', m).forEach(n => n.classList.add(n.dataset.node === m.dataset.lit ? 'is-lit' : 'is-dim')));
+
+/* read aloud: one block at a time, in the page language; one chapter at a time */
+const rd = qa('[data-read]'); let sid = 0;
+const hush = () => { sid++; speechSynthesis.cancel(); qa('.speaking').forEach(e => e.classList.remove('speaking')); rd.forEach(b => { b.toggleAttribute('data-reading', false); b.textContent = L.read; }); };
+rd.forEach(b => {
+  if (!window.speechSynthesis) { b.hidden = true; return; }
+  b.textContent = L.read;
+  on(b, 'click', () => {
+    const was = b.hasAttribute('data-reading'); hush(); if (was) return;
+    const me = sid, list = qa('p, li, figcaption, legend, .answer-field > label:first-child', b.closest('.chapter')).filter(e => !e.closest('details, header, .answer-field li') && !$('p, li, figcaption', e));
+    let i = 0; b.toggleAttribute('data-reading', true); b.textContent = L.stop;
+    const next = () => {
+      const e = list[i++]; if (me !== sid) return; if (!e) return hush();
+      e.classList.add('speaking'); e.scrollIntoView({ block: 'nearest' });
+      const u = new SpeechSynthesisUtterance(e.innerText); u.lang = root.lang;
+      u.onend = u.onerror = () => { e.classList.remove('speaking'); next(); };
+      speechSynthesis.speak(u);
+    };
+    next();
+  });
+});
+
+/* keys: J K change chapter, F S D R switch modes, ? lists them */
+const kb = $('[data-keys]');
+const dlg = kb && make('dialog', 'keys', '<h2>' + L.keys + '</h2><dl>' + [['J', L.next], ['K', L.prev], ['F', fb], ['S', sk], ['D', tt], ['R', ru], ['?', kb]]
+  .map(([k, b]) => b ? '<dt><kbd>' + k + '</kbd></dt><dd>' + esc(b.textContent ? txt(b) : b) + '</dd>' : '').join('') + '</dl><form method="dialog"><button>' + L.close + '</button></form>');
+if (dlg) { body.append(dlg); on(dlg, 'click', e => { if (e.target === dlg) dlg.close(); }); on(kb, 'click', () => dlg.showModal()); }
+on(d, 'keydown', e => {
+  const k = (e.key || '').toLowerCase(), t = e.target;
+  if (e.ctrlKey || e.metaKey || e.altKey || t.isContentEditable || /^(input|textarea|select)$/i.test(t.tagName || '') || t.closest?.('dialog[open]') || dlg?.open) return;
+  if (k === 'j' || k === 'k') { const p = parts[Math.max(0, Math.min(parts.length - 1, (focused() ? idx : parts.indexOf(current)) + (k === 'j' ? 1 : -1)))]; if (p) jump(p); }
+  else if (k === '?' && dlg) dlg.showModal();
+  else { const b = { f: fb, s: sk, d: tt, r: ru }[k]; if (!b?.click) return; b.click(); }
+  e.preventDefault();
+});
+
+/* gather: answers are saved on this device; the collect bar copies or downloads them */
+const fields = qa('.answer-field'), bar = $('.collect'), cnt = $('.count', bar), who = $('.respondent', bar), ak = key + ':answers';
+let kept = {}; try { kept = JSON.parse(store.get(ak)) || {}; } catch (e) {}
+const lab = i => { const l = i.closest('label'); return l ? txt(l) : i.value; };
+const item = li => { const c = li.cloneNode(true); qa('button', c).forEach(b => b.remove()); return txt(c); };
+const grab = f => ({ v: f.dataset.kind === 'rank' ? qa('li', f).map(item) : qa('input:checked', f).map(lab), t: $('textarea', f)?.value || '' });
+const put = (f, o) => {
+  const t = $('textarea', f), ol = $('ol', f);
+  if (t) t.value = o.t;
+  if (ol) o.v.forEach(k => qa('li', ol).forEach(li => { if (item(li) === k) ol.append(li); }));
+  else qa('input', f).forEach(i => { i.checked = o.v.includes(lab(i)); });
+};
+const answer = f => {
+  const o = kept[f.dataset.q], why = o.t.trim(), tag = $('textarea', f)?.getAttribute('aria-label');
+  return f.dataset.kind === 'rank' ? o.v.join('\n') : o.v.length ? o.v.join(', ') + (why ? '\n' + (tag ? tag + ': ' : '') + why : '') : why;
+};
+const sync = () => {
+  let n = 0; qa('.rail a.answered').forEach(a => a.classList.remove('answered'));
+  fields.forEach(f => { if (kept[f.dataset.q]) { n++; $('.rail a[href="#' + f.closest('section[id]')?.id + '"]')?.classList.add('answered'); } });
+  if (bar) bar.hidden = !n;
+  if (cnt) cnt.textContent = fmt(L.ans, { n, m: fields.length });
+};
+const save = f => {
+  const o = grab(f); if (o.v.length || o.t.trim()) kept[f.dataset.q] = o; else delete kept[f.dataset.q];
+  store.set(ak, JSON.stringify(kept)); sync();
+};
+fields.forEach(f => { if (kept[f.dataset.q]) put(f, kept[f.dataset.q]); });
+if (who) who.value = store.get('explainer:name') || '';
+on(d, 'input', e => { const f = e.target.closest?.('.answer-field'); if (f) save(f); else if (e.target === who) store.set('explainer:name', who.value); });
+on(d, 'click', e => {  /* rank: move an item up or down */
+  const b = e.target.closest?.('[data-up], [data-down]'), li = b?.closest('li'), f = li?.closest('.answer-field');
+  if (!f) return;
+  const up = 'up' in b.dataset, sib = up ? li.previousElementSibling : li.nextElementSibling;
+  if (sib) li.parentNode.insertBefore(up ? li : sib, up ? sib : li);
+  b.focus(); save(f);
+});
+sync();
+const pack = () => {
+  const t = new Date(), p = n => String(n).padStart(2, '0'), o = { title: d.title, lang: root.lang || 'en', name: who?.value.trim() || L.anon,
+    date: t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate()), answers: [], unanswered: [] };
+  fields.forEach(f => {
+    const h = $('legend, label', f), q = f.dataset.q, question = h ? txt(h) : '';
+    if (kept[q]) o.answers.push({ q, kind: f.dataset.kind || 'text', question, answer: answer(f) }); else o.unanswered.push({ q, question });
+  });
+  return o;
+};
+const markdown = o => '# ' + o.title + ': ' + fmt(L.head, o) + ' (' + o.lang + ')\n'
+  + o.answers.map(x => '\n## [' + x.q + '] ' + x.question + '\n' + x.answer + '\n').join('')
+  + (o.unanswered.length ? '\n## ' + L.none + '\n' + o.unanswered.map(x => '[' + x.q + '] ' + x.question + '\n').join('') : '');
+const flash = (b, ok) => { b.classList.add(ok ? 'go' : 'stop'); setTimeout(() => b.classList.remove('go', 'stop'), 1600); };
+const copy = (s, b) => {
+  const legacy = () => {
+    const t = d.createElement('textarea'); let ok = false; t.value = s; t.style.cssText = 'position:fixed;opacity:0'; body.append(t); t.select();
+    try { ok = d.execCommand('copy'); } catch (e) {} t.remove(); flash(b, ok);
+  };
+  navigator.clipboard?.writeText ? navigator.clipboard.writeText(s).then(() => flash(b, true), legacy) : legacy();
+};
+on(bar, 'click', e => {
+  const b = e.target.closest?.('button'); if (!b) return;
+  const o = pack();
+  if ('copy' in b.dataset) copy(markdown(o), b);
+  else if ('json' in b.dataset) copy(JSON.stringify(o, null, 2), b);
+  else if ('download' in b.dataset) {
+    const a = d.createElement('a'), slug = s => s.replace(/[\\/:*?"<>|]+/g, ' ').trim().replace(/\s+/g, '-');
+    a.href = URL.createObjectURL(new Blob([markdown(o)], { type: 'text/markdown;charset=utf-8' }));
+    a.download = slug(o.title) + '-answers-' + (who?.value.trim() ? slug(who.value) + '-' : '') + o.date + '.md';
+    body.append(a); a.click(); a.remove(); flash(b, true);
+  }
+});
 })();
 </script>
 </body>
