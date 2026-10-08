@@ -3,7 +3,7 @@
   "owner": {
     "name": "Rodrigo Arias"
   },
-  "description": "The html-explainer skill: single-file visual explanations in plain language",
+  "description": "The html-explainer plugin: single-file visual explanations in plain language, a gather skill that asks questions and collects answers, and an atlas skill for architecture references",
   "plugins": [
     {
       "name": "html-explainer",
