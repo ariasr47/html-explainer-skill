@@ -1,0 +1,125 @@
+/* =====================================================================
+   html-explainer atlas add-on  ·  v1.0
+   Atlas pages only. Load after the template's <style> block:
+     <link rel="stylesheet" href="atlas.css">
+   Uses the template's tokens and nothing else. The markup each part
+   expects is listed at the top of atlas.js. Without JavaScript the page
+   still reads: node details show, traces list their steps.
+   ===================================================================== */
+
+/* ---------- 1. Three states: legend and diagram classes ---------- */
+/* current = solid and filled, dormant = dashed amber, target = dashed and empty */
+.legend { display: flex; flex-wrap: wrap; gap: .5rem .75rem; margin: 0 0 1.25rem; padding: 0; list-style: none; max-width: none; font-size: var(--size-s); }
+.legend > * { display: inline-flex; align-items: center; margin: 0; padding: .3rem .8rem; border: 2px solid var(--line-strong); border-radius: var(--r-comp); background: var(--card); color: var(--ink); }
+.legend .state-dormant { border-style: dashed; border-color: var(--wait); background: var(--wait-tint); }
+.legend .state-target { border-style: dashed; border-color: var(--line-strong); background: transparent; }
+.d-dormant { fill: var(--wait-tint); stroke: var(--wait); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.d-target { fill: none; stroke: var(--line-strong); stroke-width: 1.5; stroke-dasharray: 6 6; }
+
+/* ---------- 2. Anchors and inspect links ---------- */
+.anchor { padding: .05em .5em; border: 1px solid var(--line); border-radius: var(--r-chip); background: var(--well); color: var(--ink-soft); font-family: var(--font-code); font-size: .85em; }
+.inspect { font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); white-space: nowrap; }
+
+/* ---------- 3. System map ---------- */
+/* A node is an svg shape or <g> with data-node; an edge has data-edge="from>to". */
+.sysmap :is(g, rect, circle, ellipse, polygon, path)[data-node] { cursor: pointer; pointer-events: all; }
+.sysmap text { pointer-events: none; }                      /* a click on a label reaches the shape under it */
+.sysmap g[data-node] text { pointer-events: auto; }         /* or counts as a click on its own node */
+.sysmap :is(rect, circle, ellipse, polygon, path)[data-node]:hover,
+.sysmap g[data-node]:hover :is(rect, circle, ellipse, polygon, path) { stroke: var(--here); }
+.sysmap :is(rect, circle, ellipse, polygon, path)[data-node].is-lit,
+.sysmap g[data-node].is-lit :is(rect, circle, ellipse, polygon, path) { stroke: var(--here); stroke-width: 2.5; }
+.sysmap :is(rect, circle, ellipse, polygon, path)[data-node].is-selected,
+.sysmap g[data-node].is-selected :is(rect, circle, ellipse, polygon, path) { stroke: var(--here); stroke-width: 4; }
+/* Keyboard focus is a heavy ink stroke: WebKit paints no outline on SVG shapes, and Chromium draws a stray ring after a click. */
+.sysmap :is(g, rect, circle, ellipse, polygon, path)[data-node]:focus { outline: none; }
+.sysmap :is(rect, circle, ellipse, polygon, path)[data-node]:focus-visible,
+.sysmap g[data-node]:focus-visible :is(rect, circle, ellipse, polygon, path) { stroke: var(--ink); stroke-width: 4; }
+/* A lit edge: line and arrowhead turn --here, the label turns bold ink. */
+.sysmap :is([data-edge].is-lit, [data-edge].is-lit *):is(.d-line, .d-line-soft) { stroke: var(--here); stroke-width: 3; }
+.sysmap :is([data-edge].is-lit, [data-edge].is-lit *).d-arrow { fill: var(--here); }
+.sysmap :is([data-edge].is-lit, [data-edge].is-lit *).d-text-s { fill: var(--ink); font-weight: 700; }
+/* With a selection, whatever is neither selected nor lit steps back. */
+.sysmap:has(.is-selected) :is(g, rect, circle, ellipse, polygon, path)[data-node]:not(.is-selected, .is-lit),
+.sysmap:has(.is-selected) [data-edge]:not(.is-lit) { opacity: .3; }
+
+.node-detail { margin: 1rem 0 0; padding: .9rem 1.1rem; background: var(--card); border: 1.5px solid var(--here); border-left-width: 6px; border-radius: var(--r-comp); }
+.node-detail > :first-child { margin-top: 0; }
+.node-detail > :last-child { margin-bottom: 0; }
+.node-detail :is(h3, h4) { font-size: var(--size-1); }
+body[data-skim="on"] .node-detail :is(p, ul) { display: block !important; }   /* a detail the reader asked for is never skimmed away */
+
+/* ---------- 4. Source inspector ---------- */
+dialog.inspector { width: min(100% - 2rem, 62rem); max-height: calc(100% - 2rem); padding: 0; overflow: hidden; border: 1.5px solid var(--line-strong); border-radius: var(--r-chapter); background: var(--card); color: var(--ink); box-shadow: var(--shadow-float); }
+dialog.inspector[open] { display: flex; flex-direction: column; }
+dialog.inspector::backdrop { background: rgb(14 21 28 / .55); }
+dialog.inspector > header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 1.1rem; border-bottom: 1px solid var(--line); }
+dialog.inspector b { display: block; font-family: var(--font-code); font-size: var(--size-s); }
+dialog.inspector small { color: var(--ink-soft); font-size: var(--size-xs); }
+dialog.inspector button { flex: none; padding: .35rem .9rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
+dialog.inspector pre { flex: 1; min-height: 0; margin: 0; padding: .6rem 0; border-radius: 0; overflow: auto; font-size: var(--size-xs); line-height: 1.55; tab-size: 4; }
+dialog.inspector pre:focus-visible { outline-offset: -3px; }
+dialog.inspector pre > span { display: block; width: max-content; min-width: 100%; padding-right: 1rem; white-space: pre; }
+dialog.inspector pre > span::before { content: attr(data-n); position: sticky; left: 0; display: inline-block; width: calc(var(--w, 3) * 1ch + 1.6rem); margin-right: 1rem; padding: 0 .7rem 0 .9rem; text-align: right; background: var(--well); color: var(--ink-soft); user-select: none; }
+dialog.inspector pre > [aria-current] { background: var(--here-tint); }   /* the anchored line, with a bar on its sticky number */
+dialog.inspector pre > [aria-current]::before { background: var(--here-tint); box-shadow: inset 4px 0 0 var(--here); color: var(--ink); }
+
+/* ---------- 5. Request traces: swimlanes ---------- */
+/* Narrow screens and no JavaScript: a numbered list, each step tagged with its lane.
+   Wide screens, once atlas.js has added the lane heads: one grid column per lane. */
+ol.trace { list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; display: grid; gap: .5rem; counter-reset: trace; font-size: var(--size-s); }
+ol.trace > li { margin: 0; }
+ol.trace > li:not(.trace-lane) { position: relative; padding: .6rem .9rem .6rem 3rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); counter-increment: trace; cursor: pointer; }
+ol.trace > li:not(.trace-lane)::after { content: counter(trace); position: absolute; left: .8rem; top: .55rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--ink-soft); color: var(--on-soft); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+ol.trace > li[data-lane]::before { content: attr(data-lane); display: inline-block; margin-right: .5rem; padding: 0 .5rem; border: 1px solid var(--line-strong); border-radius: var(--r-chip); background: var(--well); color: var(--ink-soft); font-family: var(--font-code); font-size: var(--size-xs); }
+ol.trace > .trace-lane { display: none; }
+ol.trace.is-selected { border-color: var(--here); }
+ol.trace.is-selected > li { border-color: var(--here); }
+ol.trace.is-selected > li::after { background: var(--here); color: var(--on-here); }
+@media (min-width: 760px) {
+  ol.trace:has(> .trace-lane) { grid-template-columns: repeat(var(--lanes), minmax(0, 1fr)); gap: .5rem 0; padding-bottom: .5rem; border: 1px solid var(--line); border-radius: var(--r-comp); background: linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / calc(100% / var(--lanes)) 100% repeat-x, var(--well); background-origin: border-box; }
+  ol.trace > .trace-lane { display: block; grid-column: var(--lane); grid-row: 1; padding: .45rem .5rem; border-bottom: 1px solid var(--line-strong); text-align: center; font-family: var(--font-code); font-size: var(--size-xs); font-weight: 600; color: var(--ink-soft); }
+  ol.trace:has(> .trace-lane) > li:not(.trace-lane) { grid-column: var(--lane); grid-row: var(--step); margin: 0 .5rem; }
+  /* the column now names the lane: keep the tag for screen readers only */
+  ol.trace:has(> .trace-lane) > li[data-lane]::before { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* ---------- 6. Matrix ---------- */
+/* The first column stays put while the rest scrolls; atlas.js wraps the table in .matrix-wrap. */
+.matrix-wrap { margin: 1rem 0 1.5rem; overflow-x: auto; border: 1.5px solid var(--line); border-radius: var(--r-comp); background: var(--card); }
+table.matrix { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--size-s); }
+.matrix-wrap > table.matrix { min-width: 36rem; }
+.matrix caption { position: sticky; left: 0; width: fit-content; max-width: min(100vw - 4rem, 40rem); padding: .6rem .9rem; text-align: left; font-family: var(--font-head); font-weight: 600; }
+.matrix :is(th, td) { padding: .55rem .9rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.matrix thead th { background: var(--well); font-family: var(--font-head); font-weight: 600; }
+.matrix tbody tr:last-child > * { border-bottom: 0; }
+.matrix :is(th, td):first-child { position: sticky; left: 0; z-index: 1; background: var(--card); border-right: 1px solid var(--line); font-family: var(--font-head); font-weight: 600; }
+.matrix thead th:first-child { z-index: 2; background: var(--well); }
+.matrix td.go { background: var(--go-tint); }
+.matrix td.wait { background: var(--wait-tint); }
+.matrix td.stop { background: var(--stop-tint); }
+.matrix :is(td.go, td.wait, td.stop)::before { margin-right: .4em; font-weight: 700; }   /* a glyph too, so colour is never alone */
+.matrix td.go::before { content: "✓"; color: var(--go); }
+.matrix td.wait::before { content: "!"; color: var(--wait); }
+.matrix td.stop::before { content: "✕"; color: var(--stop); }
+
+/* ---------- 7. Rail search ---------- */
+.rail .atlas-search { flex: 1 1 100%; min-width: 0; padding: .4rem .9rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); color: var(--ink); font: inherit; font-size: var(--size-s); }
+.rail .atlas-search::placeholder { color: var(--ink-soft); opacity: 1; }
+.rail .tools output { flex: 1 1 100%; font-size: var(--size-xs); color: var(--ink-soft); }
+.rail .tools output:empty { display: none; }
+@media (max-width: 1099px) { .rail .atlas-search { flex: none; width: 9.5rem; } .rail .tools output { flex: none; white-space: nowrap; } }   /* the tools row scrolls sideways here */
+main :is(h2, h3, dt) { scroll-margin-top: 5rem; }          /* clear the sticky rail after a jump */
+
+/* ---------- 8. Motion and print ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .sysmap :is([data-node], [data-edge]) { transition: opacity .15s; }
+}
+@media print {
+  dialog.inspector, .inspect { display: none !important; }
+  .node-detail[hidden] { display: block !important; }         /* print shows every detail, past the template's [hidden] rule */
+  .sysmap :is([data-node], [data-edge]) { opacity: 1 !important; }
+  .node-detail, ol.trace { break-inside: avoid; }
+  .matrix-wrap { overflow: visible; }
+  .matrix :is(th, td):first-child { position: static; }
+}
