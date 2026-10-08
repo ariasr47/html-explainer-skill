@@ -1,6 +1,6 @@
 # From one skill to a plugin with page types, including an architecture atlas
 
-Proposal, 2026-10-07. **Status: greenlit by Rodrigo on 2026-10-07, option A, all five build steps (fixes, restructure, gather, Japanese, atlas) under the lean rule.** Nothing is built yet. An agent with no other context can execute it from this file plus `docs/research/2026-10-07-next-level.md`. Build order and the reader-feature carry-overs are in "What carries over from the research" at the end.
+Proposal, 2026-10-07. **Status: greenlit by Rodrigo on 2026-10-07, option A, all five build steps (fixes, restructure, gather, Japanese, atlas) plus step 5, reader features (stepper, perspectives tabs, mini-map, read aloud, reading ruler, resume, keyboard, finish state, text size), under the lean rule. Step 5 is specified in `docs/plan/2026-10-07-build-spec.md`.** Nothing is built yet. An agent with no other context can execute it from this file plus `docs/research/2026-10-07-next-level.md`. Build order and the reader-feature carry-overs are in "What carries over from the research" at the end.
 
 ## Verdict in three lines
 
