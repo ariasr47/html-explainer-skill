@@ -8,6 +8,29 @@ Proposal, 2026-10-07. Status: for Rodrigo's decision. Nothing here is built. An 
 2. Keep the skill count small: one core skill with a registry of page types, plus two skills that need their own machinery, `explainer-gather` (two-way pages) and `explainer-atlas` (generated and curated architecture reference). Three skills, one reviewer agent, one hook.
 3. The atlas is the big one. FormIntact's backend atlas is the model: inventories parsed from source, every claim anchored to a file and line at a recorded revision, three states kept apart (current, built but dormant, adopted target), a companion skill that navigates it and insists on checking current source before any claim about today. Generalise that pipeline; do not generalise its prose.
 
+## Lean rule (added 2026-10-07, supersedes anything heavier below)
+
+Rodrigo's constraint: extremely lean, performant, no loss of design quality or visual experience, no testing, nothing ceremonious. Applied to this proposal:
+
+**Kept, because it is the product.** The design system (tokens, components, template), the writing and diagram rules, the fonts, dark mode, skim and one-chapter modes, the gather mechanic, the Japanese block, the atlas visual components. One checker, because it is a 50 ms lint with no dependencies that keeps the visual contract honest; it is the only quality tool.
+
+**Cut.** The reviewer agent, the PostToolUse hook, evals, example pages per type, the atlas screenshot verifier, the drift script, the companion-skill generator, the changelog ceremony, the three manual reads (replaced by "open it once"). The stack-specific inventory adapters for the atlas are cut too; the agent reads the code, writes anchors, and a 30-line script confirms each `file:line` exists at the recorded revision.
+
+**Budgets that define lean here.**
+
+| Thing | Budget |
+|---|---|
+| Core `SKILL.md` | under 600 words; reference files loaded only when the step needs them |
+| Each type entry | under 150 words, all types in one `types.md` |
+| `explainer-gather/SKILL.md` and `modes.md` | under 400 words plus one table |
+| `explainer-atlas/SKILL.md` | under 500 words |
+| Template CSS and script | about 15 KB and under 6 KB, zero dependencies, interactive in well under 100 ms |
+| Any explainer page | under 400 KB, single file; atlas folder under 3 MB only because it embeds source |
+| Scripts | `check.mjs`, `translate.mjs`, `anchors.mjs`, optional `diagram.mjs`; each zero-dependency Node, each under 300 lines |
+| Release | a git tag and the version field in `plugin.json`; nothing else |
+
+The diagram compiler stays optional because it is lean in the direction that matters: the agent writes ten lines of description instead of sixty lines of hand-placed SVG, with fewer errors and fewer tokens.
+
 ## Why a plugin and not more skills
 
 | Need | Skill can | Plugin adds |
@@ -23,27 +46,29 @@ Cost of the move: one restructuring pass, path changes from `~/.claude/skills/..
 ## Plugin layout
 
 ```
-html-explainer/                      plugin root = this repository
-  .claude-plugin/plugin.json         name html-explainer, version 1.0.0, skills, agents, hooks
+html-explainer/                      plugin root = this repository (lean layout)
+  .claude-plugin/plugin.json         name html-explainer, version, skills
   .claude-plugin/marketplace.json    the repo is its own one-plugin marketplace
   skills/
-    html-explainer/SKILL.md          core contract; page types live in types/
-    html-explainer/types/            decision.md status.md spec.md release.md research.md handover.md
-    explainer-gather/SKILL.md        two-way pages: answer fields, collect bar, merge
-    explainer-atlas/SKILL.md         architecture atlas: inventory, curate, render, verify, companion skill
-  agents/explainer-reviewer.md       fidelity gate, Sonnet
-  hooks/hooks.json                   PostToolUse checker on explainer and atlas pages
+    html-explainer/SKILL.md          core contract, under 600 words
+    html-explainer/types.md          decision, status, spec, release, research, handover; one short entry each
+    explainer-gather/SKILL.md        two-way pages; modes.md holds the variants table
+    explainer-atlas/SKILL.md         architecture atlas composition and anchor rules
   assets/
-    template.html design-system.md diagrams.md writing.md checklist.md gallery.html
-    atlas/template.html atlas.css atlas.js components.md
+    template.html                    tokens, components, :lang(ja) block, optional script
+    design-system.md diagrams.md writing.md gallery.html
+    atlas.css atlas.js               system map tracks, inspector, search, permalinks; loaded only by atlas pages
+    i18n/ui.ja.json glossary.example.json
+    merge.html                       single-file merge tool for gather answers
   scripts/
-    check.mjs                        structure, prose limits, contrast from tokens, type rules
-    build.mjs                        inlines template CSS into any page; regenerates gallery
-    diagram.mjs                      text description to SVG on the grid rules
-    atlas/inventory.mjs render.mjs verify.mjs drift.mjs companion.mjs
-  examples/                          one finished page per type
-  README.md LICENSE CHANGELOG.md
+    check.mjs                        structure, prose limits, contrast from tokens, type and language rules
+    translate.mjs                    text nodes to strings.<lang>.json and back
+    anchors.mjs                      confirms every file:line anchor exists at the recorded revision
+    diagram.mjs                      optional: text description to SVG on the grid rules
+  README.md LICENSE
 ```
+
+The earlier heavier layout (agents, hooks, examples, atlas inventory and verify pipeline) is withdrawn under the lean rule above.
 
 The checker reads a `data-type` attribute on `<html>` (`explainer`, `gather`, `atlas`) and applies that type's extra rules.
 
@@ -147,23 +172,21 @@ Plugin layout additions: `skills/explainer-gather/modes/*.md`, `scripts/translat
 2. Move files into the plugin layout above; rewrite paths to `${CLAUDE_PLUGIN_ROOT}`; version 1.0.0; changelog.
 3. Retire double loading: either point the junction at `skills/html-explainer` or remove the junction and install the plugin from your catalog. Not both, or the skill triggers twice.
 4. Add `gather` with the collect mode, then the Japanese block and the translate sidecar, because the brother's two most frequent needs are those two. Other gather modes follow one at a time, each with an example. He gets each by updating the plugin.
-5. Add `atlas` with the two adapters, using FormIntact as the first regression case: the generalised pipeline must reproduce its backend atlas's inventory counts (38 routes, 23 tables, 267 columns, 19 schema files, 11 packages, 44 import edges) before it is trusted on another repository.
-6. Publish: commit the marketplace manifest to the public repo, bump the catalog package, submit to the community registry when stable.
+5. Add `atlas` as a composition plus the `atlas.css` and `atlas.js` add-on and the anchor check. FormIntact's backend atlas is the reference for what good looks like; there is no regression suite.
+6. Publish: commit the marketplace manifest to the public repo and tag. Catalog packaging and any registry submission stay Rodrigo's call.
 
 ## Effort and lanes
 
-| Step | Lane | Effort |
+| Step (lean edition) | Lane | Effort |
 |---|---|---|
-| Phase 0 fixes | Sonnet | 1 hour |
-| Plugin restructure, hook, reviewer agent, examples | Sonnet | 1 day |
-| gather skill, collect mode, merge tool, exports | Sonnet | 1 day |
-| gather modes: confirm, choose, prioritise, annotate, check, protocol, pilot, readout, recurring | Sonnet | 1.5 days |
-| Japanese: `:lang(ja)` block, `ui.ja.json`, translate sidecar script, language-aware checker, glossary, example pair | Sonnet build, a Japanese-fluent review pass | 1 day |
-| atlas: inventory adapters for the two stacks, render, verify | Sonnet build, Opus review | 3 days |
-| atlas: curate step prompt and companion-skill generator | Opus or Fable for the prompt design | 1 day |
-| atlas regression against FormIntact, drift script | Sonnet | 1 day |
+| Phase 0 fixes: contrast tokens, glyphs in dots, gallery synced | Sonnet | 1 hour |
+| Plugin restructure, `types.md`, paths to `${CLAUDE_PLUGIN_ROOT}` | Sonnet | half a day |
+| gather: collect mode, `merge.html`, exports | Sonnet | 1 day |
+| gather: the other modes as table rows plus the few extra controls they need | Sonnet | half a day |
+| Japanese: `:lang(ja)` block, `ui.ja.json`, `translate.mjs`, language rules in the checker | Sonnet, one Japanese-fluent read | half a day to 1 day |
+| atlas: `atlas.css` and `atlas.js` add-on, `anchors.mjs`, skill text; FormIntact's atlas is the reference, not a regression suite | Sonnet build, one Opus design read | 1.5 to 2 days |
 
-The atlas is the expensive part, in build time and in per-run curation cost. Say so in each run's report.
+Per atlas run, the curation (reading the code and writing anchored content) is the cost; say so in each run's report. Everything else is scripts.
 
 ## Risks
 

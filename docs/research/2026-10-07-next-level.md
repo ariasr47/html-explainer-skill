@@ -167,6 +167,8 @@ Page-type composition, **requirements gathering**: answer bar states what will b
 
 Phase 0 and 1 give most of the value. Phase 3 is the "crazy visualization" tier and only pays off on pages about physical things.
 
+Lean rule, added later the same day (see `docs/proposals/2026-10-07-plugin-and-atlas.md`): from phase 2 keep only the diagram compiler, the inliner and the contrast rules in the checker; the fidelity gate, evals and example pages are withdrawn. From phase 4, "ask this page" stays as an idea; plugin packaging follows the lean layout in the proposal.
+
 ## Research findings (primary sources, read in full, not vote-verified)
 
 The deep-research run of 2026-10-07 completed its search and fetch phases (17 primary sources with extracted claims) and was stopped before the three-verifier vote to save session budget. Treat the numbers as reported by the papers, not as independently re-checked. Strength ratings are mine.
