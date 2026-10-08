@@ -1,0 +1,14 @@
+{
+  "name": "html-explainer-skill",
+  "owner": {
+    "name": "Rodrigo Arias"
+  },
+  "description": "The html-explainer skill: single-file visual explanations in plain language",
+  "plugins": [
+    {
+      "name": "html-explainer",
+      "source": "./",
+      "description": "Create single-file HTML explanations with plain language, meaningful visuals, and support for readers with ADHD or short working memory"
+    }
+  ]
+}

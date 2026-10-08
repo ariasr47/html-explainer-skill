@@ -1,6 +1,6 @@
 # From one skill to a plugin with page types, including an architecture atlas
 
-Proposal, 2026-10-07. Status: for Rodrigo's decision. Nothing here is built. An agent with no other context can execute it from this file plus `docs/research/2026-10-07-next-level.md`.
+Proposal, 2026-10-07. **Status: greenlit by Rodrigo on 2026-10-07, option A, all five build steps (fixes, restructure, gather, Japanese, atlas) under the lean rule.** Nothing is built yet. An agent with no other context can execute it from this file plus `docs/research/2026-10-07-next-level.md`. Build order and the reader-feature carry-overs are in "What carries over from the research" at the end.
 
 ## Verdict in three lines
 

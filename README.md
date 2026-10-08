@@ -16,11 +16,28 @@ git clone https://github.com/ariasr47/html-explainer-skill ~/.claude/skills/html
 git clone https://github.com/ariasr47/html-explainer-skill .claude/skills/html-explainer
 ```
 
-Or copy the folder by hand. There is no build step and no dependency. The checker needs Node 18 or newer.
+Or copy the folder by hand. The skill has no build step or runtime dependencies. Its HTML checker needs Node 18 or newer and uses only Node's built-in modules. Google Fonts are optional; generated pages fall back to system fonts.
 
 To update later, run `git pull` inside that folder.
 
 Claude Code picks the skill up automatically when a request matches its description. You can also invoke it directly with `/html-explainer <topic>`.
+
+### Local plugin packaging
+
+This local checkout also contains Claude-compatible plugin metadata in `.claude-plugin/`: plugin `html-explainer`, version `0.1.0`, and a one-plugin marketplace named `html-explainer-skill`. The plugin scans the existing skill at the repository root, so its relative references to the template, checker, and guides remain intact.
+
+These plugin files and the portfolio catalog changes are local and unpublished. The GitHub clone instructions above remain the standalone installation route; they do not imply that the remote repository already contains this plugin metadata.
+
+Existing standalone installations remain valid and need no reinstall to continue using the skill. The portfolio's portable packages are generated separately, with each skill under `skills/<skill-name>/SKILL.md` for cross-provider packaging. Maintain this source and regenerate those packages when publishing changes. Packaging does not require a particular source checkout location.
+
+To try this checkout as a Claude plugin on a separate installation, add its local marketplace and install its plugin:
+
+```text
+/plugin marketplace add /absolute/path/to/html-explainer-skill
+/plugin install html-explainer@html-explainer-skill
+```
+
+The existing personal skill installation does not need these commands.
 
 ## Use
 
@@ -44,6 +61,8 @@ The agent writes the page from `template.html`, runs `scripts/check.mjs`, checks
 | `writing.md` | Plain-English rules and the page contract |
 | `checklist.md` | The ship checklist |
 | `scripts/check.mjs` | Structural linter, zero dependencies |
+| `.claude-plugin/` | Local Claude plugin and single-plugin marketplace metadata |
+| `AGENTS.md` | Maintenance notes for this source checkout |
 
 ## Check a page by hand
 
@@ -52,6 +71,15 @@ node ~/.claude/skills/html-explainer/scripts/check.mjs docs/explainers/2026-09-1
 ```
 
 Exit code 0 means every hard rule passed. Warnings are advice.
+
+From this checkout, you can also check the bundled examples:
+
+```bash
+node scripts/check.mjs template.html
+node scripts/check.mjs gallery.html
+```
+
+The checker verifies document structure and content limits. It does not replace the phone-width and dark-theme reads in `checklist.md`.
 
 ## Design in one paragraph
 

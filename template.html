@@ -316,8 +316,12 @@ details.fold > :last-child { padding-bottom: 1rem; }
 .ask .choices > *[data-rec]::after { content: " · recommended"; font-weight: 500; opacity: .85; }
 
 /* ---------- 12. Skim mode ---------- */
-body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p),
-body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options),
+/* Components whose list or copy lives inside a div wrapper must be exempted by
+   their INNER selector, not the wrapper class: `.options` and `.split` name the
+   WRAPPER, so `ul:not(.options)` never matched the lists inside them and skim
+   mode emptied every decision card and every before/after panel. */
+body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p):not(.option .cost),
+body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options):not(.option ul):not(.split ul),
 body[data-skim="on"] .chapter details.fold,
 body[data-skim="on"] .chapter .term,
 body[data-skim="on"] .chapter .from { display: none; }
