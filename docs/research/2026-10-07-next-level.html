@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>What would make explainers better</title>
+<meta name="description" content="Research and brainstorm on taking the html-explainer skill further: what 3D, animation and interactivity do to understanding, the reading aids with evidence, the audit of the current page, two-way pages, and a five-phase roadmap.">
+<link rel="icon" href="data:,">
+<!-- Fonts are optional. The page is fully readable on the system stack if this link fails or the file is opened offline. -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap">
+<style>
+/* =====================================================================
+   html-explainer design system  ·  v1.0
+   Single-file, no build step, no external scripts. Fonts degrade to the
+   system stack. Works from file://, in an artifact, printed, and on a phone.
+   Colour has meaning. Nothing moves unless the reader moved it.
+   ===================================================================== */
+
+/* ---------- 1. Tokens ---------- */
+:root {
+  /* surfaces */
+  --paper: #f2f5f8;          /* page background, cool fog, never cream */
+  --card: #ffffff;           /* chapter and component surface */
+  --well: #e8edf2;           /* inset surface for diagrams and code */
+  --line: #d3dce4;           /* hairline borders */
+  --line-strong: #aebbc8;
+  /* text */
+  --ink: #16222e;            /* body text, deep navy, never pure black */
+  --ink-soft: #4a5a6a;       /* secondary text */
+  --ink-faint: #7b8a99;      /* tertiary, kickers */
+  /* structure accent: "you are here", links, current, the answer */
+  --here: #2457d6;
+  --here-tint: #e3ebfb;
+  /* meaning colours, used for exactly one meaning each, everywhere */
+  --go: #178a5b;   --go-tint: #dff3ea;      /* done, safe, yes */
+  --wait: #b86e00; --wait-tint: #fdf0d8;    /* in progress, caution, needs a check */
+  --stop: #c43a4b; --stop-tint: #fbe3e6;    /* blocked, risk, no */
+  --decide: #6d4ed8; --decide-tint: #ece6fb;/* the reader must choose */
+  --memory: #fff4c2; --memory-line: #e3c45a;/* "remember this", offloaded working memory */
+  /* type */
+  --font-head: "Lexend", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-code: "Atkinson Hyperlegible Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
+  --size-0: 1rem;      /* 18px base */
+  --size-1: 1.25rem;   /* 22.5 */
+  --size-2: 1.5625rem; /* 28 */
+  --size-3: 1.95rem;   /* 35 */
+  --size-4: 2.44rem;   /* 44 */
+  --size-s: .889rem;   /* 16 */
+  --size-xs: .778rem;  /* 14 */
+  /* layout */
+  --measure: 62ch;     /* prose width */
+  --wide: 1120px;      /* page width, diagrams may use all of it */
+  --rail: 232px;
+  --gap: 1.5rem;
+  --r-chapter: 18px;   /* radius by hierarchy: chapter > component > chip */
+  --r-comp: 10px;
+  --r-chip: 999px;
+  --shadow-float: 0 10px 30px rgba(22, 34, 46, .14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+    --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+    --here: #7ea2ff; --here-tint: #1c2a4a;
+    --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+    --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+    --memory: #3a3315; --memory-line: #c9ad4a;
+    --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+  --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+  --here: #7ea2ff; --here-tint: #1c2a4a;
+  --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+  --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+  --memory: #3a3315; --memory-line: #c9ad4a;
+  --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--size-0); line-height: 1.6;
+  text-rendering: optimizeLegibility; overflow-wrap: anywhere;
+}
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 600; line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(1.75rem, 1.1rem + 2.6vw, var(--size-4)); font-weight: 700; }
+h2 { font-size: clamp(1.45rem, 1rem + 1.8vw, var(--size-3)); }
+h3 { font-size: var(--size-2); }
+h4 { font-size: var(--size-1); }
+p, ul, ol { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; hyphens: manual; }
+li { margin-bottom: .35em; }
+li::marker { color: var(--ink-faint); }
+a { color: var(--here); text-decoration-thickness: 1.5px; text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2.5px; }
+strong { font-weight: 700; }
+code, kbd, pre { font-family: var(--font-code); font-size: .92em; }
+code { background: var(--well); padding: .1em .35em; border-radius: 5px; }
+pre { background: var(--well); padding: 1rem; border-radius: var(--r-comp); overflow: auto; margin: 0 0 1em; line-height: 1.5; }
+pre code { background: none; padding: 0; }
+:focus-visible { outline: 3px solid var(--here); outline-offset: 3px; border-radius: 4px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg { max-width: 100%; height: auto; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 100; padding: .5rem 1rem; background: var(--here); color: #fff; border-radius: var(--r-comp); }
+.skip:focus { top: 1rem; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 3. Page frame ---------- */
+.progress { position: fixed; inset: 0 0 auto 0; height: 4px; background: var(--here); transform: scaleX(0); transform-origin: left; z-index: 60; }
+.page { width: min(100% - 2rem, var(--wide)); margin: 0 auto; padding: 1.5rem 0 6rem; }
+@media (min-width: 1100px) {
+  .page { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: 2.5rem; }
+  .rail { position: sticky; top: 1.5rem; align-self: start; max-height: calc(100vh - 3rem); overflow: auto; }
+}
+.rail { font-size: var(--size-s); }
+.rail ol { list-style: none; margin: 0 0 1rem; padding: 0; max-width: none; }
+.rail li { margin: 0; }
+.rail a { display: flex; gap: .6rem; align-items: baseline; padding: .4rem .6rem; border-radius: var(--r-comp); color: var(--ink-soft); text-decoration: none; }
+.rail a .dot { flex: none; width: .6rem; height: .6rem; border-radius: 50%; background: var(--line-strong); transform: translateY(-.1rem); }
+.rail a[aria-current="true"] { background: var(--here-tint); color: var(--ink); font-weight: 700; }
+.rail a[aria-current="true"] .dot { background: var(--here); }
+.rail a.done .dot { background: var(--go); }
+.rail .tools { display: flex; flex-wrap: wrap; gap: .5rem; padding: .25rem .6rem; }
+.rail .tools button { padding: .35rem .75rem; border: 1.5px solid var(--line-strong); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
+.rail .tools button[aria-pressed="true"] { background: var(--here); border-color: var(--here); color: #fff; }
+@media (max-width: 1099px) {
+  .rail { position: sticky; top: 0; z-index: 50; margin: 0 -1rem 1.25rem; padding: .5rem 1rem; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .rail ol { display: flex; gap: .35rem; overflow-x: auto; margin: 0; padding-bottom: .25rem; scrollbar-width: none; }
+  .rail a { white-space: nowrap; padding: .35rem .7rem; border: 1px solid var(--line); background: var(--card); }
+  .rail .tools { padding: .4rem 0 0; }
+}
+main { min-width: 0; }
+
+/* ---------- 4. Opening: the answer first ---------- */
+.kicker { font-family: var(--font-head); font-weight: 500; font-size: var(--size-s); color: var(--ink-faint); margin: 0 0 .5rem; }
+.meta { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; color: var(--ink-soft); font-size: var(--size-s); margin: .5rem 0 1.5rem; max-width: none; }
+.answer {
+  max-width: none; margin: 0 0 1.25rem; padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+  border-left: 6px solid var(--here); background: var(--here-tint); border-radius: 0 var(--r-comp) var(--r-comp) 0;
+  font-family: var(--font-head); font-weight: 500; font-size: var(--size-1); line-height: 1.35; text-wrap: balance;
+}
+.keep { margin: 0 0 2rem; padding: 1rem 1.25rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-comp); max-width: none; }
+.keep > strong { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .4rem; }
+.keep ol { margin: 0; padding-left: 1.4rem; max-width: none; }
+.keep li { margin: 0 0 .15rem; }
+
+/* ---------- 5. Chapter map: the visual table of contents ---------- */
+.map { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: none; counter-reset: map; }
+.map li { margin: 0; counter-increment: map; }
+.map a { display: block; height: 100%; padding: .9rem 1rem .9rem 3.2rem; position: relative; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); color: var(--ink); text-decoration: none; }
+.map a::before { content: counter(map); position: absolute; left: 1rem; top: .85rem; width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.map a:hover { border-color: var(--here); }
+.map b { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .15rem; }
+.map span { color: var(--ink-soft); font-size: var(--size-s); }
+
+/* ---------- 6. Chapter: one idea, self-contained ---------- */
+.chapter { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-chapter); padding: 1.5rem clamp(1rem, 3vw, 2rem) 1.25rem; margin: 0 0 2rem; scroll-margin-top: 4.5rem; }
+.chapter > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.chapter > header .kicker { margin: 0 0 .25rem; }
+.chapter > header h2 { margin: 0; }
+.chapter > header label { flex: none; display: inline-flex; align-items: center; gap: .4rem; font-size: var(--size-s); color: var(--ink-soft); padding-top: .35rem; }
+.chapter > header input[type="checkbox"] { width: 1.25rem; height: 1.25rem; accent-color: var(--go); margin: 0; }
+.from { display: flex; gap: .6rem; align-items: baseline; margin: 0 0 1.25rem; padding: .6rem .9rem; background: var(--well); border-radius: var(--r-comp); font-size: var(--size-s); color: var(--ink-soft); max-width: none; }
+.from b { color: var(--ink); font-family: var(--font-head); font-weight: 600; flex: none; }
+.remember { margin: 1.5rem 0 0; padding: .9rem 1.1rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-comp); max-width: none; display: flex; gap: .75rem; align-items: baseline; }
+.remember b { font-family: var(--font-head); font-weight: 600; flex: none; }
+@media (max-width: 560px) {
+  .remember, .from { display: block; }
+  .remember b, .from b { display: inline; margin-right: .3rem; }
+}
+
+/* ---------- 7. Figures and diagrams ---------- */
+.figure { margin: 1.25rem 0 1.5rem; padding: 1rem; background: var(--well); border-radius: var(--r-comp); border: 1px solid var(--line); }
+.figure > svg { display: block; width: 100%; height: auto; }
+.figure .take { margin: .9rem 0 0; padding: .5rem .75rem; background: var(--card); border-left: 4px solid var(--here); border-radius: 0 6px 6px 0; font-size: var(--size-s); max-width: none; }
+.figure .take b { font-family: var(--font-head); font-weight: 600; }
+/* svg diagram vocabulary: use these classes on shapes so both themes work */
+.d-box { fill: var(--card); stroke: var(--line-strong); stroke-width: 1.5; }
+.d-box-here { fill: var(--here-tint); stroke: var(--here); stroke-width: 2; }
+.d-box-go { fill: var(--go-tint); stroke: var(--go); stroke-width: 1.5; }
+.d-box-wait { fill: var(--wait-tint); stroke: var(--wait); stroke-width: 1.5; }
+.d-box-stop { fill: var(--stop-tint); stroke: var(--stop); stroke-width: 1.5; }
+.d-box-decide { fill: var(--decide-tint); stroke: var(--decide); stroke-width: 1.5; }
+.d-line { fill: none; stroke: var(--ink-soft); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.d-line-soft { fill: none; stroke: var(--line-strong); stroke-width: 2; stroke-dasharray: 6 6; }
+.d-arrow { fill: var(--ink-soft); }
+.d-text { fill: var(--ink); font-family: var(--font-body); font-size: 15px; }
+.d-text-b { fill: var(--ink); font-family: var(--font-head); font-weight: 600; font-size: 15px; }
+.d-text-s { fill: var(--ink-soft); font-family: var(--font-body); font-size: 13px; }
+.d-num { fill: #fff; font-family: var(--font-head); font-weight: 600; font-size: 13px; }
+.d-pin { fill: var(--here); }
+
+/* CSS flow: steps with connectors, no SVG needed */
+.flow { display: flex; flex-wrap: wrap; gap: .75rem; list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; counter-reset: flow; }
+.flow li { counter-increment: flow; flex: 1 1 150px; position: relative; padding: .8rem .9rem .8rem 2.9rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); min-height: 3.4rem; }
+.flow li::before { content: counter(flow); position: absolute; left: .8rem; top: .75rem; width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; background: var(--ink-soft); color: var(--card); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.flow li b { display: block; font-family: var(--font-head); font-weight: 600; }
+.flow li span { font-size: var(--size-s); color: var(--ink-soft); }
+.flow li.here { border-color: var(--here); background: var(--here-tint); }
+.flow li.here::before { background: var(--here); }
+.flow li.go { border-color: var(--go); } .flow li.go::before { background: var(--go); }
+.flow li.wait { border-color: var(--wait); } .flow li.wait::before { background: var(--wait); }
+.flow li.stop { border-color: var(--stop); } .flow li.stop::before { background: var(--stop); }
+@media (min-width: 700px) {
+  .flow li:not(:last-child)::after { content: ""; position: absolute; right: -.75rem; top: 50%; width: .75rem; height: 2px; background: var(--line-strong); }
+}
+
+/* ---------- 8. Comparison and decisions ---------- */
+.split { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin: 1rem 0 1.5rem; }
+.split > div { padding: 1rem 1.1rem; border-radius: var(--r-comp); border: 1.5px solid var(--line); background: var(--card); }
+.split > div > b { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .4rem; }
+.split .before { border-color: var(--stop); background: var(--stop-tint); }
+.split .after { border-color: var(--go); background: var(--go-tint); }
+.split ul { margin: 0; padding-left: 1.2rem; font-size: var(--size-s); }
+
+.decision { margin: 1rem 0 1.5rem; padding: 1.25rem; border: 2px solid var(--decide); border-radius: var(--r-comp); background: var(--decide-tint); }
+.decision > h3 { margin: 0 0 .25rem; display: flex; gap: .6rem; align-items: center; }
+.decision > h3::before { content: "?"; flex: none; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 50%; background: var(--decide); color: #fff; font-family: var(--font-head); font-size: var(--size-0); }
+.decision > p { color: var(--ink-soft); }
+.options { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 1rem 0; }
+.option { position: relative; padding: 1rem 1.1rem; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: var(--r-comp); }
+.option[data-rec] { border-color: var(--go); border-width: 2.5px; }
+.option[data-rec]::after { content: attr(data-rec); position: absolute; top: -.8rem; right: .9rem; padding: .15rem .65rem; background: var(--go); color: #fff; border-radius: var(--r-chip); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+.option h4 { margin: 0 0 .5rem; }
+.option ul { list-style: none; padding: 0; margin: 0; font-size: var(--size-s); }
+.option li { padding-left: 1.4rem; position: relative; }
+.option li.plus::before { content: "✓"; position: absolute; left: 0; color: var(--go); font-weight: 700; }
+.option li.minus::before { content: "✗"; position: absolute; left: 0; color: var(--stop); font-weight: 700; }
+.option .cost { margin-top: .6rem; font-size: var(--size-s); color: var(--ink-soft); }
+.decision .nothing { margin: .5rem 0 0; padding: .6rem .9rem; background: var(--card); border-radius: 6px; font-size: var(--size-s); max-width: none; }
+.decision .nothing b { font-family: var(--font-head); font-weight: 600; }
+
+/* ---------- 9. Status, timeline, steps, tiles ---------- */
+.status { list-style: none; margin: 1rem 0 1.5rem; padding: 0; max-width: none; border: 1.5px solid var(--line); border-radius: var(--r-comp); overflow: hidden; }
+.status li { display: grid; grid-template-columns: 1.1rem minmax(120px, 1fr) 2fr; gap: .9rem; align-items: baseline; padding: .7rem 1rem; background: var(--card); margin: 0; }
+.status li + li { border-top: 1px solid var(--line); }
+.status li::before { content: ""; width: .85rem; height: .85rem; border-radius: 50%; background: var(--line-strong); transform: translateY(.1rem); }
+.status li.go::before { background: var(--go); } .status li.wait::before { background: var(--wait); }
+.status li.stop::before { background: var(--stop); } .status li.decide::before { background: var(--decide); }
+.status li.here::before { background: var(--here); } .status li.memory::before { background: var(--memory-line); }
+.status li b { font-family: var(--font-head); font-weight: 600; }
+.status li span { color: var(--ink-soft); font-size: var(--size-s); }
+@media (max-width: 560px) { .status li { grid-template-columns: 1.1rem 1fr; } .status li span { grid-column: 2; } }
+
+.timeline { list-style: none; margin: 1.25rem 0 1.5rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0; max-width: none; position: relative; }
+.timeline::before { content: ""; position: absolute; left: 0; right: 0; top: .55rem; height: 3px; background: var(--line-strong); }
+.timeline li { position: relative; padding: 1.5rem .75rem 0 0; margin: 0; }
+.timeline li::before { content: ""; position: absolute; left: 0; top: 0; width: 1.1rem; height: 1.1rem; border-radius: 50%; background: var(--card); border: 3px solid var(--line-strong); }
+.timeline li.go::before { background: var(--go); border-color: var(--go); }
+.timeline li.here::before { background: var(--here); border-color: var(--here); box-shadow: 0 0 0 5px var(--here-tint); }
+.timeline li.here .when { color: var(--here); }
+.timeline li.here .when::before { content: "You are here · "; font-weight: 700; }
+.timeline .when { display: block; font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); margin-bottom: .2rem; }
+.timeline .what { font-size: var(--size-s); color: var(--ink-soft); }
+
+.steps { list-style: none; margin: 1rem 0 1.5rem; padding: 0; counter-reset: step; max-width: none; }
+.steps > li { counter-increment: step; position: relative; padding: .25rem 0 .9rem 3rem; margin: 0; }
+.steps > li::before { content: counter(step); position: absolute; left: 0; top: .1rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--here); color: #fff; font-family: var(--font-head); font-weight: 600; }
+.steps > li:not(:last-child)::after { content: ""; position: absolute; left: .95rem; top: 2.3rem; bottom: 0; width: 2px; background: var(--line); }
+.steps > li > b { font-family: var(--font-head); font-weight: 600; }
+
+.tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 1rem 0 1.5rem; }
+.tile { padding: .9rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); }
+.tile .n { display: block; font-family: var(--font-head); font-weight: 700; font-size: var(--size-3); line-height: 1; color: var(--here); }
+.tile .l { font-size: var(--size-s); color: var(--ink-soft); }
+.tile.go .n { color: var(--go); } .tile.wait .n { color: var(--wait); } .tile.stop .n { color: var(--stop); }
+
+/* ---------- 10. Metaphor, callouts, terms, folds ---------- */
+.metaphor { display: grid; grid-template-columns: 4rem 1fr; gap: 1rem; align-items: start; margin: 1rem 0 1.5rem; padding: 1rem 1.1rem; background: var(--card); border: 1.5px dashed var(--line-strong); border-radius: var(--r-comp); }
+.metaphor .icon { font-size: 2.6rem; line-height: 1; text-align: center; padding-top: .2rem; }
+.metaphor p { margin: 0; }
+.metaphor b { font-family: var(--font-head); font-weight: 600; }
+@media (max-width: 480px) { .metaphor { grid-template-columns: 1fr; } .metaphor .icon { text-align: left; } }
+
+.callout { margin: 1rem 0 1.5rem; padding: .9rem 1.1rem .9rem 1.25rem; border-left: 5px solid var(--line-strong); border-radius: 0 var(--r-comp) var(--r-comp) 0; background: var(--well); max-width: none; }
+.callout > b { font-family: var(--font-head); font-weight: 600; display: block; margin-bottom: .2rem; }
+.callout p:last-child { margin-bottom: 0; }
+.callout.tip { border-color: var(--go); background: var(--go-tint); }
+.callout.warn { border-color: var(--wait); background: var(--wait-tint); }
+.callout.stop { border-color: var(--stop); background: var(--stop-tint); }
+
+.term { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; align-items: baseline; margin: 1rem 0 1.5rem; padding: .8rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); max-width: none; font-size: var(--size-s); }
+.term dt { font-family: var(--font-head); font-weight: 600; }
+.term dd { margin: 0; color: var(--ink-soft); }
+@media (max-width: 480px) { .term { grid-template-columns: 1fr; } .term dd { margin-bottom: .5rem; } }
+dfn { font-style: normal; text-decoration: underline dotted var(--ink-faint); text-underline-offset: .2em; cursor: help; }
+
+details.fold { margin: 1rem 0 1.25rem; border: 1.5px solid var(--line); border-radius: var(--r-comp); background: var(--card); }
+details.fold > summary { list-style: none; cursor: pointer; padding: .75rem 1rem; font-family: var(--font-head); font-weight: 600; display: flex; gap: .6rem; align-items: center; color: var(--ink-soft); }
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: "+"; flex: none; width: 1.4rem; height: 1.4rem; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line-strong); font-size: var(--size-s); }
+details.fold[open] > summary::before { content: "−"; }
+details.fold[open] > summary { border-bottom: 1px solid var(--line); color: var(--ink); }
+details.fold > :not(summary) { padding: 0 1rem; }
+details.fold > :nth-child(2) { padding-top: 1rem; }
+details.fold > :last-child { padding-bottom: 1rem; }
+
+/* ---------- 11. Closing: recap and the ask ---------- */
+.recap { margin: 0 0 1.5rem; padding: 1.25rem 1.5rem; background: var(--memory); border: 1.5px solid var(--memory-line); border-radius: var(--r-chapter); max-width: none; }
+.recap h2 { margin-bottom: .6rem; }
+.recap ol { margin: 0; padding-left: 1.4rem; }
+.ask { margin: 0 0 2rem; padding: 1.25rem 1.5rem; border: 2.5px solid var(--decide); border-radius: var(--r-chapter); background: var(--card); }
+.ask h2 { margin-bottom: .5rem; }
+.ask .choices { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 .5rem; }
+.ask .choices > * { padding: .7rem 1.1rem; border-radius: var(--r-comp); border: 2px solid var(--decide); background: var(--decide-tint); color: var(--ink); font-family: var(--font-head); font-weight: 600; text-decoration: none; }
+.ask .choices > *[data-rec] { background: var(--decide); color: #fff; }
+.ask .choices > *[data-rec]::after { content: " · recommended"; font-weight: 500; opacity: .85; }
+
+/* ---------- 12. Skim mode ---------- */
+/* Components whose list or copy lives inside a div wrapper must be exempted by
+   their INNER selector, not the wrapper class: `.options` and `.split` name the
+   WRAPPER, so `ul:not(.options)` never matched the lists inside them and skim
+   mode emptied every decision card and every before/after panel. */
+body[data-skim="on"] .chapter p:not(.take):not(.remember):not(.nothing):not(.callout p):not(.metaphor p):not(.option .cost),
+body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options):not(.option ul):not(.split ul),
+body[data-skim="on"] .chapter details.fold,
+body[data-skim="on"] .chapter .term,
+body[data-skim="on"] .chapter .from { display: none; }
+body[data-skim="on"] .chapter .figure,
+body[data-skim="on"] .chapter .remember { display: flex; }
+body[data-skim="on"] .chapter .figure { display: block; }
+
+/* ---------- 12b. Focus mode: one chapter at a time, reader paced ---------- */
+body[data-focus="on"] .map,
+body[data-focus="on"] .chapter:not([data-active]),
+body[data-focus="on"] .recap:not([data-active]),
+body[data-focus="on"] .ask:not([data-active]) { display: none; }
+.focus-nav { display: none; justify-content: space-between; align-items: center; gap: 1rem; margin: 0 0 2rem; }
+body[data-focus="on"] .focus-nav { display: flex; }
+.focus-nav button { padding: .7rem 1.2rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; }
+.focus-nav button[data-next] { background: var(--here); color: #fff; }
+.focus-nav button:disabled { opacity: .4; cursor: default; }
+.focus-nav .where { color: var(--ink-soft); font-size: var(--size-s); }
+
+/* ---------- 13. Print ---------- */
+@media print {
+  :root { --paper: #fff; --card: #fff; }
+  html { font-size: 11pt; }
+  .page { display: block; width: auto; padding: 0; }
+  .rail, .progress, .skip, .chapter > header label { display: none !important; }
+  .chapter { break-inside: avoid; border-color: #bbb; box-shadow: none; }
+  details.fold { break-inside: avoid; }
+  details.fold[open] > summary::before, details.fold > summary::before { display: none; }
+  a { color: inherit; text-decoration: none; }
+  .figure { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="progress" aria-hidden="true"></div>
+
+<div class="page">
+  <nav class="rail" aria-label="Chapters">
+    <ol>
+      <li><a href="#three-d"><span class="dot"></span>3D and motion</a></li>
+      <li><a href="#guided"><span class="dot"></span>Guided beats free</a></li>
+      <li><a href="#aids"><span class="dot"></span>Reading aids</a></li>
+      <li><a href="#audit"><span class="dot"></span>The audit</a></li>
+      <li><a href="#two-way"><span class="dot"></span>Two-way pages</a></li>
+      <li><a href="#roadmap"><span class="dot"></span>The roadmap</a></li>
+      <li><a href="#recap"><span class="dot"></span>Recap</a></li>
+    </ol>
+    <div class="tools">
+      <button type="button" data-skim aria-pressed="false">Skim mode</button>
+      <button type="button" data-focus aria-pressed="false">One chapter at a time</button>
+      <button type="button" data-theme-toggle>Dark / light</button>
+    </div>
+  </nav>
+
+  <main id="main">
+    <div class="focus-nav" aria-live="polite"><button type="button" data-prev>Previous</button><span class="where"></span><button type="button" data-next>Next</button></div>
+
+    <p class="kicker">Research and brainstorm on taking explainers further, 2026-10-07</p>
+    <h1>What would make explainers better</h1>
+    <div class="meta"><span>Reading time about 6 minutes</span><span>17 primary sources, claims extracted, vote phase skipped</span><span>For: Rodrigo</span></div>
+
+    <p class="answer">The big win is not 3D or animation. It is guided steps, one job per visual, read-aloud and a reading ruler, and pages that ask questions and collect the answers.</p>
+
+    <div class="keep">
+      <strong>Keep in your head (only these)</strong>
+      <ol>
+        <li>3D raises interest, not understanding. Opt-in, physical subjects only.</li>
+        <li>Guided beats free: fixed steps, worked examples, presets before sliders.</li>
+        <li>Read-aloud and a reading ruler have the best evidence for this reader.</li>
+      </ol>
+    </div>
+
+    <ol class="map">
+      <li><a href="#three-d"><b>3D and motion</b><span>What 600 people and three reviews say about WebGL and animation.</span></a></li>
+      <li><a href="#guided"><b>Guided beats free</b><span>Sliders and simulations only help when they are led.</span></a></li>
+      <li><a href="#aids"><b>Reading aids</b><span>The cheap features with the strongest evidence.</span></a></li>
+      <li><a href="#audit"><b>The audit</b><span>Two contrast bugs in the current page, measured.</span></a></li>
+      <li><a href="#two-way"><b>Two-way pages</b><span>Your brother's use, made first-class.</span></a></li>
+      <li><a href="#roadmap"><b>The roadmap</b><span>Five phases, and which one to start.</span></a></li>
+    </ol>
+
+    <!-- 1 -->
+    <section class="chapter" id="three-d" data-keep="3D and motion are rewards, not lessons. Behind a button, physical subjects only.">
+      <header>
+        <div><p class="kicker">Chapter 1 of 6, about 1 minute</p><h2>Does 3D or animation help a reader understand?</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> you asked whether WebGL, Three.js and other rich visual libraries could take explainers to the next level.</p>
+
+      <p>The best test found compared the same data stories as static, animated and 3D pages. The 3D version won on interest and lost on understanding.</p>
+
+      <div class="tiles">
+        <div class="tile"><span class="n">600</span><span class="l">people compared static, animated and 3D versions</span></div>
+        <div class="tile stop"><span class="n">0</span><span class="l">comprehension gain for 3D; static and animated rated easier</span></div>
+        <div class="tile stop"><span class="n">90%</span><span class="l">of build time went to the 3D version</span></div>
+      </div>
+
+      <ul class="status">
+        <li class="stop"><b>3D immersion</b><span>More interesting, harder to follow. 11 of 40 comments called the movement distracting, 7 called flashy visuals untrustworthy.</span></li>
+        <li class="stop"><b>Animation for novices</b><span>Novices learned more from static diagrams than from animation; only experienced readers did as well or better with motion.</span></li>
+        <li class="wait"><b>Animation with a job</b><span>Motion earns its place for state changes, causality and uncertainty. Students watching maths animations learned, but overrated how much the motion helped.</span></li>
+        <li class="stop"><b>Scrollytelling</b><span>In 454 people it matched plain text and labels on comprehension. No advantage.</span></li>
+      </ul>
+
+      <p>So the ladder stays mostly where it is. Climb only when the subject itself is spatial.</p>
+
+      <ol class="flow">
+        <li class="go"><b>CSS components</b><span>Sequence, compare, status, choice.</span></li>
+        <li class="go"><b>Inline SVG</b><span>Branches, maps, wireframes.</span></li>
+        <li class="here"><b>Steps, no library</b><span>One picture, several states.</span></li>
+        <li class="wait"><b>Small libraries</b><span>Real data, scrubbable motion. Opt-in.</span></li>
+        <li class="stop"><b>3D viewer</b><span>Physical objects only. Behind a button.</span></li>
+      </ol>
+
+      <details class="fold"><summary>Show the sources</summary>
+        <ul>
+          <li>Kim et al. 2024, "Understanding the Impact of Spatial Immersion in Web Data Stories", 600 Prolific participants, within-subjects. Interest up in 3 of 4 stories; no per-condition recall reported.</li>
+          <li>Kalyuga 2007, "Expertise Reversal Effect", Educational Psychology Review. Static diagrams beat animation for novices.</li>
+          <li>Bos and Wigmans 2025, Utrecht, 3Blue1Brown videos with about 20 calculus students per session, pre and post tests.</li>
+          <li>Mendez and Such 2026, scrollytelling versus text and labels, N = 454, between-subjects.</li>
+          <li>Hohman, Conlen, Heer and Chau, Distill 2020. Animation's demonstrated value limited to state transitions, uncertainty, causality, narrative.</li>
+          <li>Library sizes measured today from jsDelivr: Three.js 675 KB, model-viewer 933 KB, Babylon 4.9 MB, Mermaid 2.5 MB, GSAP 70 KB, Rough.js 27 KB.</li>
+        </ul>
+      </details>
+
+      <p class="remember"><b>Remember:</b> 3D and motion are rewards, not lessons; the system allows them only behind a button and only for physical things.</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="chapter" id="guided" data-keep="Default view shows the point. Steps add depth. Presets before sliders. Never hide the lesson behind a click.">
+      <header>
+        <div><p class="kicker">Chapter 2 of 6, about 1 minute</p><h2>Why guided interaction wins and free exploration loses</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> rich motion and 3D do not improve understanding. Interactivity is the next candidate, and the evidence splits it in two.</p>
+
+      <p>A meta-analysis of 164 studies settled the question for novices. Letting people explore on their own loses to being shown. Leading them through it with feedback wins.</p>
+
+      <div class="split">
+        <div class="before"><b>Free exploration</b><ul><li>Loses to direct instruction (d = -0.38).</li><li>Loses to worked examples by d = -0.63.</li><li>Takes longer and feels harder.</li></ul></div>
+        <div class="after"><b>Guided steps with feedback</b><ul><li>Beats other instruction (d = +0.30).</li><li>Fixed segments: retention d = 0.42.</li><li>ADHD novices: 87% fewer errors with single-step segments and 4-second pauses.</li></ul></div>
+      </div>
+
+      <p>One more hard lesson comes from the newsroom that invented the modern explainer. Most readers never click.</p>
+
+      <div class="callout warn"><b>Never hide the lesson behind a click</b><p>The New York Times graphics desk found readers skip steppers, tabs and sliders, and never see tooltips. The default state of every interactive figure must already make the point. Steps add depth, they never carry the message.</p></div>
+
+      <ol class="flow">
+        <li class="go"><b>Default view</b><span>Already shows the conclusion.</span></li>
+        <li class="go"><b>Fixed steps</b><span>Next and Previous, one change each.</span></li>
+        <li class="wait"><b>Presets</b><span>Three worked cases to tap.</span></li>
+        <li class="stop"><b>Free slider</b><span>Last, and only after presets.</span></li>
+      </ol>
+
+      <details class="fold"><summary>Show the sources</summary>
+        <ul>
+          <li>Alfieri, Brooks, Aldrich and Tenenbaum 2011, Journal of Educational Psychology, 164 studies. Unassisted discovery d = -0.38 (580 comparisons); enhanced discovery d = +0.30 (360 comparisons); time-to-answer favoured non-discovery (d = -0.72).</li>
+          <li>Rey et al. 2019, meta-analysis of the segmenting effect, 56 investigations. Retention d = 0.32, system-paced segments d = 0.42; learner-paced effects less confirmed.</li>
+          <li>Pimenova et al. 2026, ASSETS, 17 programmers with ADHD and 10 without. Single-instruction segments with 4-second pauses cut errors by about 87%; the ADHD-specific extra was a trend, not significant.</li>
+          <li>Archie Tse, NYT, "Why we are doing fewer interactives", Malofiej 2016.</li>
+          <li>Kalyuga 2007: learner control not reliably beneficial; embedded labels on diagrams help novices (effect sizes above 1.6) and hurt experts.</li>
+        </ul>
+      </details>
+
+      <p class="remember"><b>Remember:</b> the default view shows the point, steps add depth, presets come before sliders, and nothing essential ever hides behind a click.</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="chapter" id="aids" data-keep="Read-aloud, reading ruler, chapter time, finish feedback. Spacing controls and games are weak.">
+      <header>
+        <div><p class="kicker">Chapter 3 of 6, about 1 minute</p><h2>Which cheap reading aids actually have evidence?</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> interaction helps only when it is guided. The features below need no library and no 3D, and most of them have better evidence than either.</p>
+
+      <p>Two of these were tested on readers like you. Read-aloud raised comprehension in the ADHD group and did nothing for typical readers. A reading ruler sped up everyone.</p>
+
+      <ul class="status">
+        <li class="go"><b>Read aloud</b><span>Comprehension up for ADHD readers with reading difficulty; dyslexic readers got speed, not comprehension; typical readers were disrupted. Built into every browser, zero dependencies.</span></li>
+        <li class="go"><b>Reading ruler</b><span>Grey bar, shade or underline styles added 10 to 20 words a minute for 177 readers, half dyslexic.</span></li>
+        <li class="go"><b>Fixed pauses between steps</b><span>The 87% error cut above. Four seconds was the sweet spot; two felt rushed, six lost people.</span></li>
+        <li class="go"><b>Time per chapter</b><span>ADHD shows medium deficits in judging time across 55 studies. A stated cost lowers the barrier to starting.</span></li>
+        <li class="wait"><b>Completion feedback</b><span>Gamified tasks were more engaging in every study and ADHD children completed more trials, but performance was mixed. Keep it light.</span></li>
+        <li class="wait"><b>Letter and word spacing controls</b><span>Letterforms did nothing; extra letter spacing alone slowed reading; effects were tiny. Offer it, expect little.</span></li>
+      </ul>
+
+      <details class="fold"><summary>Show the sources</summary>
+        <ul>
+          <li>Wood et al. 2018, Journal of Learning Disabilities, 22 studies, 2,942 readers: text-to-speech d = .35 (CI .14 to .56); between-subject designs d = .61. Read-along highlighting was never tested.</li>
+          <li>Chen, Hung and Jian 2026, Reading and Writing, eye-tracking, junior high students: text-to-speech improved comprehension in the ADHD-related group, not in typical readers.</li>
+          <li>Niklaus, Cai, Bylinskii and Wallace 2023, CHI, "Digital Reading Rulers", 177 crowdsourced readers.</li>
+          <li>Marx, Cortese, Koelch and Hacker 2022, JAACAP meta-analysis of timing in ADHD, 55 studies.</li>
+          <li>Lumsden et al. 2016, JMIR Serious Games, systematic review of gamification, 33 studies, six in ADHD.</li>
+          <li>Galliussi et al. 2020, Annals of Dyslexia, 128 Italian children: letterform and spacing effects.</li>
+        </ul>
+      </details>
+
+      <p class="remember"><b>Remember:</b> read-aloud, a reading ruler, fixed pauses and a time per chapter are the evidence-backed upgrades; spacing controls and games are extras.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="chapter" id="audit" data-keep="Dark-mode buttons and light kickers fail contrast. Colour-only dots fail WCAG 1.4.1. Both are token fixes.">
+      <header>
+        <div><p class="kicker">Chapter 4 of 6, about 1 minute</p><h2>What is wrong with the current page, measured</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the evidence points at cheap features, not big libraries. Before adding any, the page has two defects an audit found today.</p>
+
+      <p>An accessibility audit ran on the gallery page in both themes. Body text, links and the yellow memory boxes pass. Two groups fail.</p>
+
+      <div class="tiles">
+        <div class="tile stop"><span class="n">2.0 to 2.5</span><span class="l">dark-mode contrast of white text on coloured buttons and badges; 4.5 is the minimum</span></div>
+        <div class="tile stop"><span class="n">3.2</span><span class="l">light-mode contrast of the small grey kicker text</span></div>
+        <div class="tile go"><span class="n">5.6 to 14.6</span><span class="l">everything else, both themes</span></div>
+      </div>
+
+      <ul class="status">
+        <li class="stop"><b>Dark-mode fills</b><span>The meaning colours are lightened for dark backgrounds, but the text on them stays white. Fix: "on-colour" text tokens that flip to dark ink in dark mode.</span></li>
+        <li class="stop"><b>Kicker grey</b><span>Too faint in light mode. Fix: darken the tertiary ink token one step.</span></li>
+        <li class="wait"><b>Colour-only dots</b><span>Status and timeline dots carry meaning by colour alone, which fails the lowest WCAG level. Fix: a glyph in every dot and step number.</span></li>
+        <li class="go"><b>Checker</b><span>Teach it to compute contrast from the tokens so this cannot come back.</span></li>
+      </ul>
+
+      <details class="fold"><summary>Show the measurements</summary>
+        <p>axe-core 4.10.2 in the browser, light and dark. Light: 7 violations, all <code>.kicker</code> at 3.23 to 3.54 against 4.5. Dark: white on <code>--here</code> 2.47, on <code>--go</code> 1.97, on <code>--decide</code> 2.30, on <code>--ink-soft</code> 2.07. Amber text on white in light mode is 3.99, fine only at large sizes. Full table in <code>docs/research/2026-10-07-next-level.md</code>.</p>
+      </details>
+
+      <p class="remember"><b>Remember:</b> dark-mode buttons and light kickers fail contrast and the dots are colour-only; all three are token fixes, about an hour.</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="chapter" id="two-way" data-keep="Explain, ask, type, copy all, merge. Answer fields become a first-class page type.">
+      <header>
+        <div><p class="kicker">Chapter 5 of 6, about 1 minute</p><h2>Your brother's use: pages that ask and collect</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the fixes above keep the page honest. This chapter is about a new job the page is already doing in the wild.</p>
+
+      <p>Your brother explains a topic to coworkers, adds text fields under his questions, and copies every answer into one text. That is requirement gathering, and the system should support it on purpose.</p>
+
+      <ol class="flow">
+        <li class="go"><b>Explain</b><span>The chapter, as today.</span></li>
+        <li class="here"><b>Ask</b><span>One question, one field, says what a good answer holds.</span></li>
+        <li><b>Type</b><span>Saved in the browser, nothing leaves the page.</span></li>
+        <li><b>Copy all</b><span>Fixed shape: question verbatim, then answer.</span></li>
+        <li class="wait"><b>Merge</b><span>Paste several people's copies into one view.</span></li>
+      </ol>
+
+      <ol class="steps">
+        <li><b>Answer field.</b> A labelled text box or fixed choices under any question, with an "answered" tick that also lights the rail dot.</li>
+        <li><b>Collect bar.</b> Appears after the first answer: "3 of 5 answered, copy all answers". Also download as Markdown or copy as JSON.</li>
+        <li><b>Merge tool.</b> For the author: paste everyone's copied text, get one view per question with names.</li>
+      </ol>
+
+      <div class="callout tip"><b>Why this fits the evidence</b><p>Typing an answer is a self-explanation prompt, one of the few interactive mechanisms the literature ties to comprehension. The field is the lesson's worked example turned around.</p></div>
+
+      <p class="remember"><b>Remember:</b> explain, ask, type, copy all, merge; answer fields become a page type with their own checker rules.</p>
+    </section>
+
+    <!-- 6 -->
+    <section class="chapter" id="roadmap" data-keep="Phase 0 fixes, phase 1 zero-dependency features. 3D is phase 3 and only for physical subjects.">
+      <header>
+        <div><p class="kicker">Chapter 6 of 6, about 1 minute</p><h2>Five phases, and which one is worth starting</h2></div>
+        <label><input type="checkbox" data-done> Done</label>
+      </header>
+
+      <p class="from"><b>Before this:</b> the evidence favours cheap guided features and fixes over big libraries. The roadmap puts them in that order.</p>
+
+      <ol class="timeline">
+        <li class="here"><span class="when">Phase 0, 1 hour</span><span class="what">Contrast tokens, glyphs in dots, gallery synced with your skim fix.</span></li>
+        <li><span class="when">Phase 1, about a day</span><span class="what">Answer fields and collect bar, stepper figure, perspectives tabs, read aloud, reading ruler, resume, time per chapter.</span></li>
+        <li><span class="when">Phase 2, 1 to 2 days</span><span class="what">Diagram compiler, inliner, checker v2 with contrast, fidelity gate, five evals, example pages.</span></li>
+        <li><span class="when">Phase 3, 1 to 2 days</span><span class="what">Screenshot frame, isometric stack, presets then sliders, 3D viewer behind a button.</span></li>
+        <li><span class="when">Phase 4, half a day</span><span class="what">Ask-this-page when published online; plugin release through your catalog.</span></li>
+      </ol>
+
+      <div class="decision">
+        <h3>Where should the next build start?</h3>
+        <p>Phases 0 and 1 carry most of the value and need no library.</p>
+        <div class="options">
+          <div class="option" data-rec="Recommended">
+            <h4>Phase 0 and 1 together</h4>
+            <ul><li class="plus">Fixes the audit and ships the evidence-backed features</li><li class="plus">Covers your brother's use</li><li class="minus">About a day of Sonnet lane</li></ul>
+          </div>
+          <div class="option">
+            <h4>Phase 0 only</h4>
+            <ul><li class="plus">One hour, page becomes accessible</li><li class="minus">Nothing new for readers yet</li></ul>
+          </div>
+          <div class="option">
+            <h4>Jump to phase 3</h4>
+            <ul><li class="plus">The visually impressive tier</li><li class="minus">Evidence says it will not improve understanding</li><li class="minus">Built on a page with known contrast bugs</li></ul>
+          </div>
+        </div>
+        <p class="nothing"><b>If you do nothing:</b> the skill keeps working as it is, with the two contrast defects and no answer fields.</p>
+      </div>
+
+      <details class="fold"><summary>What was skipped today, honestly</summary>
+        <p>The research run was stopped before its verification phase to save your session budget. Every source above is primary and was read in full by the search agents, but no claim went through the three-sceptic vote that the September pass used. Treat effect sizes as reported, not as independently re-checked. The full brainstorm, measurements and roadmap are in <code>docs/research/2026-10-07-next-level.md</code> in the skill repository.</p>
+      </details>
+
+      <p class="remember"><b>Remember:</b> start with phase 0 and 1; 3D waits for phase 3 and only for physical subjects.</p>
+    </section>
+
+    <section class="recap" id="recap">
+      <h2>Recap</h2>
+      <ol>
+        <li>3D and motion are rewards, not lessons; the system allows them only behind a button and only for physical things.</li>
+        <li>The default view shows the point, steps add depth, presets come before sliders, and nothing essential ever hides behind a click.</li>
+        <li>Read-aloud, a reading ruler, fixed pauses and a time per chapter are the evidence-backed upgrades; spacing controls and games are extras.</li>
+        <li>Dark-mode buttons and light kickers fail contrast and the dots are colour-only; all three are token fixes, about an hour.</li>
+        <li>Explain, ask, type, copy all, merge; answer fields become a page type with their own checker rules.</li>
+        <li>Start with phase 0 and 1; 3D waits for phase 3 and only for physical subjects.</li>
+      </ol>
+    </section>
+
+    <section class="ask">
+      <h2>What I need from you</h2>
+      <p>Which phase should the next session build first?</p>
+      <div class="choices"><a href="#roadmap" data-rec>Phase 0 and 1 together</a><a href="#roadmap">Phase 0 only</a><a href="#roadmap">Jump to phase 3</a></div>
+      <p class="nothing"><b>If you do nothing:</b> nothing changes; the plan sits in the repo until a session is told to build it.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* Optional behaviour. The page reads fine with JavaScript off. */
+(function () {
+  'use strict';
+  var d = document, root = d.documentElement, body = d.body;
+  var store = { get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+  var key = 'explainer:' + (location.pathname || 'page');
+
+  /* theme */
+  var saved = store.get('explainer:theme'); if (saved) root.setAttribute('data-theme', saved);
+  var tt = d.querySelector('[data-theme-toggle]');
+  if (tt) tt.addEventListener('click', function () {
+    var dark = root.getAttribute('data-theme') === 'dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    var next = dark ? 'light' : 'dark'; root.setAttribute('data-theme', next); store.set('explainer:theme', next);
+  });
+
+  /* skim mode */
+  var sk = d.querySelector('[data-skim]');
+  if (sk) sk.addEventListener('click', function () {
+    var on = body.getAttribute('data-skim') !== 'on';
+    body.setAttribute('data-skim', on ? 'on' : 'off'); sk.setAttribute('aria-pressed', String(on));
+  });
+
+  /* focus mode: one chapter at a time, reader paced */
+  var fb = d.querySelector('[data-focus]');
+  var parts = [].slice.call(d.querySelectorAll('.chapter, .recap, .ask'));
+  var nav = d.querySelector('.focus-nav'), idx = 0;
+  function showPart(i) {
+    idx = Math.max(0, Math.min(parts.length - 1, i));
+    parts.forEach(function (p, n) { if (n === idx) p.setAttribute('data-active', ''); else p.removeAttribute('data-active'); });
+    if (nav) {
+      nav.querySelector('[data-prev]').disabled = idx === 0;
+      nav.querySelector('[data-next]').disabled = idx === parts.length - 1;
+      var h = parts[idx].querySelector('h2'); nav.querySelector('.where').textContent = (idx + 1) + ' of ' + parts.length + (h ? ': ' + h.textContent : '');
+    }
+    if (body.getAttribute('data-focus') === 'on') { var top = nav ? nav.getBoundingClientRect().top + scrollY - 8 : 0; scrollTo(0, top); }
+  }
+  if (fb && parts.length) {
+    fb.addEventListener('click', function () {
+      var on = body.getAttribute('data-focus') !== 'on';
+      body.setAttribute('data-focus', on ? 'on' : 'off'); fb.setAttribute('aria-pressed', String(on));
+      if (on) { var cur = parts.findIndex(function (p) { return p.getBoundingClientRect().bottom > 120; }); showPart(cur < 0 ? 0 : cur); }
+    });
+    if (nav) {
+      nav.querySelector('[data-prev]').addEventListener('click', function () { showPart(idx - 1); });
+      nav.querySelector('[data-next]').addEventListener('click', function () { showPart(idx + 1); });
+    }
+    d.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('.rail a[href^="#"], .map a[href^="#"]');
+      if (!a || body.getAttribute('data-focus') !== 'on') return;
+      var t = d.getElementById(a.getAttribute('href').slice(1)); var n = parts.indexOf(t);
+      if (n >= 0) { e.preventDefault(); showPart(n); }
+    });
+  }
+
+  /* progress bar */
+  var bar = d.querySelector('.progress');
+  function progress() {
+    if (!bar) return; var h = root.scrollHeight - innerHeight;
+    bar.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, scrollY / h) : 0) + ')';
+  }
+  addEventListener('scroll', progress, { passive: true }); addEventListener('resize', progress); progress();
+
+  /* current chapter in the rail */
+  var links = [].slice.call(d.querySelectorAll('.rail a[href^="#"]'));
+  var targets = links.map(function (a) { return d.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+  if ('IntersectionObserver' in window && targets.length) {
+    var current = null;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) current = e.target; });
+      links.forEach(function (a) { a.setAttribute('aria-current', current && a.getAttribute('href') === '#' + current.id ? 'true' : 'false'); });
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* done checkboxes, remembered per page */
+  var done = {}; try { done = JSON.parse(store.get(key + ':done') || '{}'); } catch (e) {}
+  [].slice.call(d.querySelectorAll('.chapter')).forEach(function (c) {
+    var box = c.querySelector('input[data-done]'); if (!box) return;
+    var link = d.querySelector('.rail a[href="#' + c.id + '"]');
+    function paint() { if (link) link.classList.toggle('done', box.checked); }
+    box.checked = !!done[c.id]; paint();
+    box.addEventListener('change', function () { done[c.id] = box.checked; store.set(key + ':done', JSON.stringify(done)); paint(); });
+  });
+})();
+</script>
+</body>
+</html>
