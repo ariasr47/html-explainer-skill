@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Merge answers</title>
+<meta name="description" content="Paste or drop the answers people send back from a gather page, and read them side by side, question by question.">
+<link rel="icon" href="data:,">
+<style>
+/* =====================================================================
+   Merge tool for gather pages. One file, no dependencies, no network.
+   Tokens and base styles are copied from assets/template.html. Answers are
+   read in this tab and never uploaded or stored.
+   ===================================================================== */
+
+/* ---------- 1. Tokens (copy of template.html) ---------- */
+:root {
+  /* surfaces */
+  --paper: #f2f5f8;          /* page background, cool fog, never cream */
+  --card: #ffffff;           /* chapter and component surface */
+  --well: #e8edf2;           /* inset surface for diagrams and code */
+  --line: #d3dce4;           /* hairline borders */
+  --line-strong: #aebbc8;
+  /* text */
+  --ink: #16222e;            /* body text, deep navy, never pure black */
+  --ink-soft: #4a5a6a;       /* secondary text */
+  --ink-faint: #5f6f7f;      /* tertiary, kickers */
+  /* structure accent: "you are here", links, current, the answer */
+  --here: #2457d6;
+  --here-tint: #e3ebfb;
+  /* meaning colours, used for exactly one meaning each, everywhere */
+  --go: #14784f;   --go-tint: #dff3ea;      /* done, safe, yes */
+  --wait: #9c5d00; --wait-tint: #fdf0d8;    /* in progress, caution, needs a check */
+  --stop: #c43a4b; --stop-tint: #fbe3e6;    /* blocked, risk, no */
+  --decide: #6d4ed8; --decide-tint: #ece6fb;/* the reader must choose */
+  --memory: #fff4c2; --memory-line: #e3c45a;/* "remember this", offloaded working memory */
+  /* text that sits on a meaning fill: white on the light fills, page-dark on the dark fills, 4.5:1 or better */
+  --on-here: #ffffff; --on-go: #ffffff; --on-wait: #ffffff; --on-stop: #ffffff; --on-decide: #ffffff; --on-soft: #ffffff;
+  /* type */
+  --font-head: "Lexend", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-code: "Atkinson Hyperlegible Mono", "Cascadia Code", Consolas, "SF Mono", monospace;
+  --size-0: 1rem;      /* 18px base */
+  --size-1: 1.25rem;   /* 22.5 */
+  --size-2: 1.5625rem; /* 28 */
+  --size-3: 1.95rem;   /* 35 */
+  --size-4: 2.44rem;   /* 44 */
+  --size-s: .889rem;   /* 16 */
+  --size-xs: .778rem;  /* 14 */
+  /* layout */
+  --measure: 62ch;     /* prose width */
+  --wide: 1120px;      /* page width, diagrams may use all of it */
+  --rail: 232px;
+  --gap: 1.5rem;
+  --r-chapter: 18px;   /* radius by hierarchy: chapter > component > chip */
+  --r-comp: 10px;
+  --r-chip: 999px;
+  --shadow-float: 0 10px 30px rgba(22, 34, 46, .14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+    --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+    --here: #7ea2ff; --here-tint: #1c2a4a;
+    --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+    --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+    --memory: #3a3315; --memory-line: #c9ad4a;
+    --on-here: #0e151c; --on-go: #0e151c; --on-wait: #0e151c; --on-stop: #0e151c; --on-decide: #0e151c; --on-soft: #0e151c;
+    --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e151c; --card: #161f29; --well: #1d2833; --line: #2a3642; --line-strong: #3d4b5a;
+  --ink: #e8eef4; --ink-soft: #a9b6c3; --ink-faint: #7d8b99;
+  --here: #7ea2ff; --here-tint: #1c2a4a;
+  --go: #4ccf93; --go-tint: #123326; --wait: #f0b455; --wait-tint: #3a2a0f;
+  --stop: #ff7a8a; --stop-tint: #3f1b22; --decide: #b39cff; --decide-tint: #2a2148;
+  --memory: #3a3315; --memory-line: #c9ad4a;
+  --on-here: #0e151c; --on-go: #0e151c; --on-wait: #0e151c; --on-stop: #0e151c; --on-decide: #0e151c; --on-soft: #0e151c;
+  --shadow-float: 0 10px 30px rgba(0, 0, 0, .5);
+}
+
+/* ---------- 2. Base (copy of template.html) ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { font-size: 18px; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--size-0); line-height: 1.6;
+  text-rendering: optimizeLegibility; overflow-wrap: anywhere;
+}
+h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 600; line-height: 1.15; margin: 0 0 .5em; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(1.75rem, 1.1rem + 2.6vw, var(--size-4)); font-weight: 700; }
+h2 { font-size: clamp(1.45rem, 1rem + 1.8vw, var(--size-3)); }
+h3 { font-size: var(--size-2); }
+h4 { font-size: var(--size-1); }
+p, ul, ol { margin: 0 0 1em; max-width: var(--measure); text-wrap: pretty; hyphens: manual; }
+li { margin-bottom: .35em; }
+li::marker { color: var(--ink-faint); }
+a { color: var(--here); text-decoration-thickness: 1.5px; text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2.5px; }
+strong { font-weight: 700; }
+code, kbd, pre { font-family: var(--font-code); font-size: .92em; }
+code { background: var(--well); padding: .1em .35em; border-radius: 5px; }
+pre { background: var(--well); padding: 1rem; border-radius: var(--r-comp); overflow: auto; margin: 0 0 1em; line-height: 1.5; }
+pre code { background: none; padding: 0; }
+:focus-visible { outline: 3px solid var(--here); outline-offset: 3px; border-radius: 4px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+img, svg { max-width: 100%; height: auto; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+.skip { position: absolute; left: 1rem; top: -4rem; z-index: 100; padding: .5rem 1rem; background: var(--here); color: var(--on-here); border-radius: var(--r-comp); }
+.skip:focus { top: 1rem; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 3. This tool ---------- */
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+[hidden] { display: none !important; }
+.wrap { width: min(100% - 2rem, 62rem); margin: 0 auto; padding: 1.5rem 0 5rem; }
+.top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem 1rem; }
+.kicker { margin: 0 0 .5rem; font-family: var(--font-head); font-weight: 500; font-size: var(--size-s); color: var(--ink-faint); }
+.top h1 { margin: 0 0 .5rem; }
+.lede { margin: 0 0 1.5rem; color: var(--ink-soft); }
+.chip { padding: .4rem .85rem; border: 1.5px solid var(--ink-faint); border-radius: var(--r-chip); background: var(--card); font-size: var(--size-xs); font-weight: 700; }
+.panel { margin: 0 0 1.5rem; padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 1.5rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-chapter); }
+.panel > h2 { margin-bottom: .9rem; font-size: var(--size-1); }
+.lab { display: block; margin-bottom: .15rem; font-family: var(--font-head); font-weight: 600; }
+.hint { margin: 0 0 .6rem; color: var(--ink-soft); font-size: var(--size-s); }
+textarea {
+  display: block; width: 100%; min-height: 11rem; max-height: 60vh; resize: vertical; padding: .8rem 1rem;
+  font-family: var(--font-code); font-size: var(--size-s); line-height: 1.5; color: var(--ink);
+  background: var(--paper); border: 1.5px solid var(--ink-faint); border-radius: var(--r-comp);
+}
+textarea::placeholder { color: var(--ink-faint); opacity: 1; }
+.drop { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: 1rem; padding: .9rem 1.1rem; background: var(--well); border: 2px dashed var(--ink-faint); border-radius: var(--r-comp); }
+.drop[data-over] { border-color: var(--here); background: var(--here-tint); }
+.drop p { margin: 0; max-width: none; font-size: var(--size-s); }
+input[type="file"] { max-width: 100%; font: inherit; font-size: var(--size-s); color: var(--ink-soft); }
+input[type="file"]::file-selector-button {
+  margin-right: .75rem; padding: .5rem .9rem; border: 2px solid var(--here); border-radius: var(--r-comp);
+  background: var(--card); color: var(--ink); font: inherit; font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); cursor: pointer;
+}
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 1rem 0 0; }
+.btn { min-height: 2.75rem; padding: .55rem 1.1rem; border: 2px solid var(--here); border-radius: var(--r-comp); background: var(--card); color: var(--ink); font-family: var(--font-head); font-weight: 600; font-size: var(--size-s); }
+.btn:not(:disabled):hover { background: var(--here-tint); }
+.btn.primary { background: var(--here); color: var(--on-here); }
+.btn.primary:not(:disabled):hover { background: var(--here); box-shadow: 0 0 0 3px var(--here-tint); }
+.btn:disabled { opacity: .45; cursor: default; }
+.msg { color: var(--ink-soft); font-size: var(--size-s); }
+.summary { margin: 0 0 1rem; max-width: none; font-family: var(--font-head); font-weight: 600; }
+.note { margin: 0 0 1rem; padding: .8rem 1rem .8rem 1.1rem; max-width: none; border-left: 5px solid var(--wait); border-radius: 0 var(--r-comp) var(--r-comp) 0; background: var(--wait-tint); font-size: var(--size-s); }
+.note b { font-family: var(--font-head); font-weight: 600; }
+.note ul { margin: .3rem 0 0; padding-left: 1.2rem; max-width: none; }
+.note li { margin: 0 0 .2rem; }
+.q { margin: 1.25rem 0 0; border: 1.5px solid var(--line); border-radius: var(--r-comp); overflow: hidden; }
+.q > header { padding: .85rem 1rem .7rem; }
+.q h3 { margin: 0 0 .2rem; font-size: var(--size-0); line-height: 1.35; }
+.qid { margin-right: .5rem; padding: .05rem .55rem; border-radius: var(--r-chip); background: var(--here-tint); color: var(--here); font-family: var(--font-code); font-size: var(--size-xs); font-weight: 600; white-space: nowrap; }
+.counts, .none { margin: 0; max-width: none; color: var(--ink-soft); font-size: var(--size-s); }
+.none { padding: 0 1rem 1rem; }
+table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: var(--size-s); }
+th, td { padding: .6rem 1rem; text-align: left; vertical-align: top; border-top: 1px solid var(--line); }
+thead th { padding-top: .5rem; padding-bottom: .5rem; background: var(--well); color: var(--ink-soft); font-family: var(--font-head); font-weight: 600; font-size: var(--size-xs); }
+thead th:nth-child(1) { width: 11rem; }
+thead th:nth-child(2) { width: 7.5rem; }
+thead th:nth-child(3) { width: 4.5rem; }
+tbody th { font-family: var(--font-head); font-weight: 600; }
+td.meta { white-space: nowrap; color: var(--ink-soft); }
+td.ans { white-space: pre-wrap; }
+@media (max-width: 640px) {
+  table, tbody { display: block; }
+  thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: .15rem .9rem; padding: .7rem 1rem; }
+  tbody tr { border-top: 1px solid var(--line); }
+  th, td { display: block; width: auto; padding: 0; border: 0; }
+  td.ans { grid-column: 1 / -1; margin-top: .25rem; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main class="wrap" id="main">
+  <div class="top">
+    <div>
+      <p class="kicker">Companion to gather pages</p>
+      <h1>Merge answers</h1>
+    </div>
+    <button type="button" class="chip" data-theme-toggle>Dark / light</button>
+  </div>
+  <p class="lede">Paste the answers people send back, or drop their files. Each question gets one table with a row per person. Everything is read in this tab and nothing is uploaded.</p>
+  <noscript><p class="note">This tool needs JavaScript to read and merge answers.</p></noscript>
+
+  <section class="panel" aria-labelledby="add-h">
+    <h2 id="add-h">Add answers</h2>
+    <label class="lab" for="paste">Paste copies here</label>
+    <p class="hint" id="paste-hint">Text from Copy all answers or Download .md, or JSON from Copy JSON. Paste as many as you like, one after another.</p>
+    <textarea id="paste" aria-describedby="paste-hint" spellcheck="false" autocomplete="off" placeholder="# Pricing review: answers from Ana on 2026-10-07 (en)&#10;&#10;## [q1] Which step costs the most time?&#10;The legal sign-off.&#10;&#10;## Not answered&#10;[q2] What would you change first?"></textarea>
+    <div class="drop" id="zone">
+      <p><b>Drop files anywhere on this page</b> (.md, .txt or .json), or</p>
+      <label class="visually-hidden" for="files">Choose files</label>
+      <input id="files" type="file" multiple accept=".md,.markdown,.txt,.json,text/plain,text/markdown,application/json">
+    </div>
+    <div class="bar"><button type="button" class="btn" data-clear>Clear</button></div>
+  </section>
+
+  <section class="panel" aria-labelledby="out-h">
+    <h2 id="out-h">Answers by question</h2>
+    <p class="summary" id="summary" role="status"></p>
+    <div class="note" id="notes" hidden></div>
+    <div class="bar">
+      <button type="button" class="btn" data-md disabled>Copy Markdown</button>
+      <button type="button" class="btn" data-json disabled>Copy JSON</button>
+      <button type="button" class="btn primary" data-csv disabled>Download CSV</button>
+      <span class="msg" id="msg" role="status"></span>
+    </div>
+    <div id="out"></div>
+  </section>
+</main>
+
+<script>
+'use strict';
+
+/* ===== PURE:BEGIN  Parsing, grouping and export. No DOM. Node can run this block on its own.
+   Reads the shapes the gather template writes, in whatever language the page was.
+   Markdown: a first line "# {title}: ... {YYYY-MM-DD} ... ({lang})" read by position, so both
+   "# T: answers from Taro on 2026-10-07 (ja)" and "# T: Taro の回答 (2026-10-07) (ja)" work. Then
+   "## [{q}] {question}" with the answer on the lines below (it may span lines). Any other "## " heading
+   with "[{q}] {question}" lines under it ("## Not answered", "## 未回答", in any language) is the unanswered list.
+   JSON: {"title","lang","name","date","answers":[{"q","kind","question","answer"}],"unanswered":[{"q","question"}]}. */
+
+const BOM = String.fromCharCode(0xFEFF);
+const Q_HEAD = /^ {0,3}##\s+\[([^\]]+)\]\s*(.*)$/;
+const H2 = /^ {0,3}##(?:\s+(.*))?$/;
+const KNOWN_NONE = /^ {0,3}##\s+(?:Not answered|未回答)\s*$/i;
+const NONE_ITEM = /^(?:[-*・•]\s*)?\[([^\]]+)\]\s*(.*)$/;
+const ISO_ONE = /\d{4}-\d{2}-\d{2}/;
+const ISO_ALL = /\d{4}-\d{2}-\d{2}/g;
+
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const clean = v => (v == null ? '' : String(v).trim());
+
+function newCopy(title, name, date, lang, source) {
+  return { title: clean(title), name: clean(name) || 'anonymous', date: clean(date), lang: clean(lang), source: source || '', answers: [], unanswered: [], headless: false };
+}
+
+/* Name, date and lang from a copy's first line, by position; null when the line is not a copy header.
+   The last "(...)" that is not a date is the lang. The last ISO date is the date. The name is the text after
+   the last colon before the date. The English "answers from ... on" and Japanese "...の回答" wording is
+   trimmed off the name, any other connecting words stay in it. */
+function parseHeader(line) {
+  const h = /^ {0,3}#\s+(.+)$/.exec(line);
+  if (!h) return null;
+  const tail = /\s*[（(]([^（）()]*)[）)]\s*$/.exec(h[1].trim());
+  if (!tail || ISO_ONE.test(tail[1])) return null;
+  const lang = tail[1], s = h[1].trim().slice(0, tail.index);
+  const dates = s.match(ISO_ALL);
+  if (!dates) return null;
+  const date = dates[dates.length - 1];
+  const before = s.slice(0, s.lastIndexOf(date)).replace(/[（(]\s*$/, '').trim();
+  const en = /^(.*?):\s+answers from\s+(.*?)\s+on$/.exec(before);
+  if (en) return { title: en[1], name: en[2], date, lang };
+  const colon = Math.max(before.lastIndexOf(':'), before.lastIndexOf('：'));
+  if (colon < 0) return null;
+  return { title: before.slice(0, colon).trim(), name: before.slice(colon + 1).replace(/\s*(?:さん|様)?の回答$/, '').trim(), date, lang };
+}
+
+/* One or more pasted Markdown copies in a single string -> array of copies. */
+function parseMarkdown(text) {
+  const lines = String(text).split(BOM).join('').split(/\r\n|\r|\n/);
+  const copies = [];
+  let cur = null, sec = null;
+  const ensure = () => { if (!cur) { cur = newCopy('', '', '', '', 'md'); cur.headless = true; copies.push(cur); } };
+  const close = () => {
+    if (sec && sec.none) {
+      sec.lines.forEach(l => { const m = NONE_ITEM.exec(l.trim()); if (m) cur.unanswered.push({ q: m[1].trim(), question: m[2].trim() }); });
+    } else if (sec) {
+      const answer = sec.lines.join('\n').trim();
+      if (answer) cur.answers.push({ q: sec.q, kind: '', question: sec.question, answer });
+      else cur.unanswered.push({ q: sec.q, question: sec.question });
+    }
+    sec = null;
+  };
+  /* An unfamiliar "## " heading starts the unanswered list only when "[q] ..." lines follow it.
+     Without them it is text inside an answer, so a heading typed in an answer does not cut the answer short. */
+  const boundary = l => Q_HEAD.test(l) || H2.test(l) || parseHeader(l) !== null;
+  const listFollows = i => { for (let j = i + 1; j < lines.length && !boundary(lines[j]); j++) if (NONE_ITEM.test(lines[j].trim())) return true; return false; };
+  lines.forEach((line, i) => {
+    const head = parseHeader(line);
+    if (head) { close(); cur = newCopy(head.title, head.name, head.date, head.lang, 'md'); copies.push(cur); return; }
+    const q = Q_HEAD.exec(line);
+    if (q) { close(); ensure(); sec = { q: q[1].trim(), question: q[2].trim(), lines: [] }; return; }
+    if (H2.test(line) && (KNOWN_NONE.test(line) || listFollows(i))) { close(); ensure(); sec = { none: true, lines: [] }; return; }
+    if (sec) sec.lines.push(line);
+  });
+  close();
+  return copies;
+}
+
+/* A JSON "answer" may be a string, a number, or an array (multi labels, ranked items). */
+function answerText(v, kind) {
+  if (v == null) return '';
+  if (Array.isArray(v)) return v.map(x => answerText(x, kind)).filter(Boolean).join(kind === 'rank' ? '\n' : ', ');
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v).trim();
+}
+
+function jsonCopy(o) {
+  const list = k => (Array.isArray(o[k]) ? o[k] : []);
+  const c = newCopy(o.title, o.name, o.date, o.lang, 'json');
+  list('answers').forEach(a => {
+    if (!a || !clean(a.q)) return;
+    const answer = answerText(a.answer, a.kind);
+    if (answer) c.answers.push({ q: clean(a.q), kind: clean(a.kind), question: clean(a.question), answer });
+    else c.unanswered.push({ q: clean(a.q), question: clean(a.question) });
+  });
+  list('unanswered').forEach(u => { if (u && clean(u.q)) c.unanswered.push({ q: clean(u.q), question: clean(u.question) }); });
+  return c;
+}
+
+/* Index of the "}" that closes the "{" at s, skipping strings and escapes; -1 if it never closes. */
+function matchBrace(t, s) {
+  let depth = 0, inStr = false;
+  for (let i = s; i < t.length; i++) {
+    const c = t.charCodeAt(i);
+    if (inStr) { if (c === 92) i++; else if (c === 34) inStr = false; }
+    else if (c === 34) inStr = true;
+    else if (c === 123) depth++;
+    else if (c === 125 && --depth === 0) return i;
+  }
+  return -1;
+}
+
+/* JSON copies inside any text. A block is kept when it parses into an answers copy, or when it does not parse
+   but plainly meant to be one (value stays undefined). Other braces, such as a code sample inside an answer,
+   are left alone. A copy that never closes ran off the end of a paste: it is taken up to the next blank line. */
+function findJson(text) {
+  const blocks = [], meant = /"(?:answers|unanswered)"\s*:/;
+  let i = 0;
+  while ((i = text.indexOf('{', i)) >= 0) {
+    if (!/^\{\s*"/.test(text.slice(i, i + 24))) { i++; continue; }
+    let e = matchBrace(text, i), value;
+    if (e < 0) {
+      const blank = text.slice(i).search(/\n[ \t]*\n/);
+      e = blank < 0 ? text.length - 1 : i + blank - 1;
+      if (!meant.test(text.slice(i, e + 1))) { i++; continue; }
+    } else {
+      try { value = JSON.parse(text.slice(i, e + 1)); } catch (err) { /* unreadable, judged below */ }
+      const ours = value === undefined ? meant.test(text.slice(i, e + 1)) : Array.isArray(value.answers) || Array.isArray(value.unanswered);
+      if (!ours) { i++; continue; }
+    }
+    blocks.push({ start: i, end: e + 1, value });
+    i = e + 1;
+  }
+  return blocks;
+}
+
+/* The same answers can arrive twice, as Markdown and as JSON. When a Markdown copy matches a JSON copy on name,
+   date, lang and every answer, keep the JSON one: it also knows each question's kind. */
+function preferJson(copies) {
+  const key = c => JSON.stringify([/^(anonymous|匿名)$/.test(c.name) ? '' : c.name, c.date, c.lang,
+    c.answers.map(a => a.q + '\n' + a.answer).sort(), c.unanswered.map(u => u.q).sort()]);
+  const json = new Set(copies.filter(c => c.source === 'json').map(key));
+  const kept = copies.filter(c => c.source !== 'md' || !json.has(key(c)));
+  return { copies: kept, dropped: copies.length - kept.length };
+}
+
+/* Everything pasted or dropped -> { copies, problems }, copies in the order they appear. */
+function parseAny(text) {
+  text = String(text || '');
+  const found = [], problems = [];
+  let pos = 0, unreadable = 0;
+  const take = piece => parseMarkdown(piece).forEach(c => found.push(c));
+  findJson(text).forEach(b => {
+    take(text.slice(pos, b.start));
+    pos = b.end;
+    if (b.value === undefined) { unreadable++; return; }
+    const c = jsonCopy(b.value);
+    if (c.answers.length || c.unanswered.length) found.push(c);
+  });
+  take(text.slice(pos));
+  const { copies, dropped } = preferJson(found);
+  if (unreadable) problems.push(plural(unreadable, 'JSON block', 'JSON blocks') + ' could not be read. Check that the copy is complete.');
+  if (dropped) problems.push(plural(dropped, 'Markdown copy has', 'Markdown copies have') + ' the same name, date and answers as a JSON copy. Only the JSON copy is used.');
+  return { copies, problems };
+}
+
+/* Copies -> { copies: n, questions: [{ q, question, lang, rows: [...], unanswered: [...] }] }, grouped by q. */
+function groupByQuestion(copies) {
+  const map = new Map();
+  const slot = (q, question, lang) => {
+    let g = map.get(q);
+    if (!g) { g = { q, question: '', lang: '', rows: [], unanswered: [] }; map.set(q, g); }
+    if (!g.question && question) { g.question = question; g.lang = lang; }
+    return g;
+  };
+  copies.forEach(c => {
+    c.answers.forEach(a => slot(a.q, a.question, c.lang).rows.push({ respondent: c.name, date: c.date, lang: c.lang, answer: a.answer }));
+    c.unanswered.forEach(u => slot(u.q, u.question, c.lang).unanswered.push({ respondent: c.name, date: c.date, lang: c.lang }));
+  });
+  const questions = Array.from(map.values());
+  questions.forEach(g => g.rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0)));
+  return { copies: copies.length, questions };
+}
+
+/* Warnings the author should see before trusting the numbers. */
+function checkCopies(copies) {
+  const out = [], seen = new Set(), titles = new Map();
+  let repeats = 0, headless = 0;
+  copies.forEach(c => {
+    const sig = JSON.stringify([c.name, c.date, c.lang, c.title, c.answers.map(a => [a.q, a.answer]), c.unanswered.map(u => u.q)]);
+    if (seen.has(sig)) repeats++; else seen.add(sig);
+    if (c.headless) { headless++; return; }
+    if (!titles.has(c.lang)) titles.set(c.lang, new Set());
+    titles.get(c.lang).add(c.title);
+  });
+  if (repeats) out.push(plural(repeats, 'copy repeats', 'copies repeat') + ' an earlier one (same name, date and answers). Both are counted. Remove the extra paste if it was a mistake.');
+  if (headless) out.push(plural(headless, 'copy has', 'copies have') + ' no header line, so the name, date and language are unknown. ' + (headless === 1 ? 'It is' : 'They are') + ' shown as anonymous.');
+  titles.forEach((set, lang) => {
+    if (set.size > 1) out.push('Copies' + (lang ? ' in ' + lang : '') + ' come from pages with different titles (' + Array.from(set).join(', ') + '). Answers with the same question id are merged anyway.');
+  });
+  return out;
+}
+
+function mergeText(text) {
+  const parsed = parseAny(text);
+  return { model: groupByQuestion(parsed.copies), problems: parsed.problems.concat(checkCopies(parsed.copies)) };
+}
+
+function toMarkdown(model) {
+  const out = ['# Merged answers: ' + plural(model.copies, 'copy', 'copies') + ', ' + plural(model.questions.length, 'question', 'questions'), ''];
+  model.questions.forEach(g => {
+    out.push('## [' + g.q + '] ' + g.question, '');
+    g.rows.forEach(r => {
+      const bits = [r.date, r.lang].filter(Boolean).join(', ');
+      const lines = r.answer.split('\n');
+      out.push('- **' + r.respondent + '**' + (bits ? ' (' + bits + ')' : '') + ': ' + lines[0]);
+      lines.slice(1).forEach(l => out.push('  ' + l));
+    });
+    if (!g.rows.length) out.push('Nobody answered.');
+    if (g.unanswered.length) out.push('', 'Not answered: ' + g.unanswered.map(r => r.respondent).join(', '));
+    out.push('');
+  });
+  return out.join('\n');
+}
+
+function toJSON(model) {
+  return JSON.stringify({
+    copies: model.copies,
+    questions: model.questions.map(g => ({ q: g.q, question: g.question, answers: g.rows, unanswered: g.unanswered }))
+  }, null, 2);
+}
+
+/* RFC 4180: fields with a comma, quote or line break are quoted, quotes are doubled, records end in CRLF.
+   A field that starts with = + - @ gets a leading apostrophe so a spreadsheet shows it as text, not a formula. */
+function csvCell(v) {
+  let s = v == null ? '' : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function toCSV(model) {
+  const rows = [['q', 'question', 'respondent', 'date', 'lang', 'answer']];
+  model.questions.forEach(g => g.rows.forEach(r => rows.push([g.q, g.question, r.respondent, r.date, r.lang, r.answer])));
+  return rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+}
+/* ===== PURE:END ===== */
+
+(function () {
+  const $ = s => document.querySelector(s);
+  const box = $('#paste'), out = $('#out'), summary = $('#summary'), notes = $('#notes'), msg = $('#msg');
+  const buttons = [$('[data-md]'), $('[data-json]'), $('[data-csv]')];
+  let model = { copies: 0, questions: [] }, timer = 0;
+
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    Object.keys(attrs).forEach(k => { if (attrs[k]) n.setAttribute(k, attrs[k]); });
+    kids.forEach(k => n.append(k));
+    return n;
+  }
+  const okLang = l => (/^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(l) ? l : '');
+  function say(text) { msg.textContent = ''; setTimeout(() => { msg.textContent = text; }, 30); }
+
+  function block(g, i) {
+    const hid = 'qh' + i, missing = g.unanswered.length;
+    const counts = g.rows.length + ' answered, ' + missing + ' not answered' + (missing ? ': ' + g.unanswered.map(r => r.respondent).join(', ') : '');
+    const head = el('header', {}, el('h3', { id: hid, lang: okLang(g.lang) }, el('span', { class: 'qid' }, g.q), g.question || 'Question text missing'), el('p', { class: 'counts' }, counts));
+    if (!g.rows.length) return el('section', { class: 'q', 'aria-labelledby': hid }, head, el('p', { class: 'none' }, 'Nobody answered this question.'));
+    const cols = ['Respondent', 'Date', 'Lang', 'Answer'].map(t => el('th', { scope: 'col', role: 'columnheader' }, t));
+    const rows = g.rows.map(r => el('tr', { role: 'row' },
+      el('th', { scope: 'row', role: 'rowheader' }, r.respondent),
+      el('td', { role: 'cell', class: 'meta' }, r.date),
+      el('td', { role: 'cell', class: 'meta' }, r.lang),
+      el('td', { role: 'cell', class: 'ans', lang: okLang(r.lang) }, r.answer)));
+    const table = el('table', { role: 'table', 'aria-labelledby': hid },
+      el('thead', { role: 'rowgroup' }, el('tr', { role: 'row' }, ...cols)),
+      el('tbody', { role: 'rowgroup' }, ...rows));
+    return el('section', { class: 'q', 'aria-labelledby': hid }, head, table);
+  }
+
+  function render(res) {
+    model = res.model;
+    const has = model.questions.length > 0;
+    buttons.forEach(b => { b.disabled = !has; });
+    summary.textContent = has ? plural(model.copies, 'copy', 'copies') + ', ' + plural(model.questions.length, 'question', 'questions') + '.'
+      : box.value.trim() ? 'No answers found. Paste text from Copy all answers or Download .md, or JSON from Copy JSON.'
+      : 'Nothing to merge yet. Paste or drop some copies above.';
+    notes.textContent = '';
+    notes.hidden = !res.problems.length;
+    if (res.problems.length) notes.append(el('b', {}, 'Check this'), el('ul', {}, ...res.problems.map(p => el('li', {}, p))));
+    out.textContent = '';
+    model.questions.forEach((g, i) => out.append(block(g, i)));
+  }
+
+  function run() { say(''); render(mergeText(box.value)); }
+  box.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 150); });
+
+  /* files */
+  const isText = f => /^text\//.test(f.type) || f.type === 'application/json' || /\.(md|markdown|txt|json)$/i.test(f.name);
+  function append(text) {
+    const t = text.replace(/\s+$/, '');
+    if (t.trim()) box.value += (box.value.trim() ? '\n\n' : '') + t;
+  }
+  async function addFiles(list) {
+    const added = [], skipped = [];
+    for (const f of Array.from(list)) {
+      if (!isText(f) || f.size > 5e6) { skipped.push(f.name); continue; }
+      try { append(await f.text()); added.push(f.name); } catch (e) { skipped.push(f.name); }
+    }
+    run();
+    say(((added.length ? 'Added ' + plural(added.length, 'file', 'files') + '. ' : '') + (skipped.length ? 'Skipped ' + skipped.join(', ') + ' (not readable text under 5 MB).' : '')).trim());
+  }
+  const zone = $('#zone'), picker = $('#files');
+  picker.addEventListener('change', () => { addFiles(picker.files).then(() => { picker.value = ''; }); });
+  const hasFiles = e => !!e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') >= 0;
+  ['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { if (hasFiles(e)) { e.preventDefault(); zone.setAttribute('data-over', ''); } }));
+  document.addEventListener('dragleave', e => { if (!e.relatedTarget) zone.removeAttribute('data-over'); });
+  document.addEventListener('drop', e => { zone.removeAttribute('data-over'); if (hasFiles(e)) { e.preventDefault(); addFiles(e.dataTransfer.files); } });
+  zone.addEventListener('dragover', e => e.preventDefault());
+  zone.addEventListener('drop', e => { if (!hasFiles(e)) { e.preventDefault(); append(e.dataTransfer.getData('text/plain')); run(); } });
+
+  /* buttons */
+  async function copy(text, label) {
+    const prev = document.activeElement;
+    try { await navigator.clipboard.writeText(text); say(label + ' copied.'); return; } catch (e) { /* fall through */ }
+    const t = el('textarea', { readonly: 'readonly', 'aria-hidden': 'true' });
+    t.value = text; t.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.append(t); t.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e) { /* blocked */ }
+    t.remove(); if (prev && prev.focus) prev.focus();
+    say(ok ? label + ' copied.' : 'This browser blocked copying. Use Download CSV instead.');
+  }
+  function download(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = el('a', { href: url, download: name });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  $('[data-md]').addEventListener('click', () => copy(toMarkdown(model), 'Markdown'));
+  $('[data-json]').addEventListener('click', () => copy(toJSON(model), 'JSON'));
+  $('[data-csv]').addEventListener('click', () => { download('merged-answers.csv', BOM + toCSV(model), 'text/csv;charset=utf-8'); say('CSV downloaded.'); });
+  $('[data-clear]').addEventListener('click', () => { box.value = ''; run(); say('Cleared.'); box.focus(); });
+
+  /* theme, same switch and storage key as the explainer template */
+  const root = document.documentElement;
+  try { const saved = localStorage.getItem('explainer:theme'); if (saved) root.setAttribute('data-theme', saved); } catch (e) { /* storage blocked */ }
+  $('[data-theme-toggle]').addEventListener('click', () => {
+    const dark = root.getAttribute('data-theme') === 'dark' || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    const next = dark ? 'light' : 'dark'; root.setAttribute('data-theme', next);
+    try { localStorage.setItem('explainer:theme', next); } catch (e) { /* storage blocked */ }
+  });
+
+  run();
+})();
+</script>
+</body>
+</html>
