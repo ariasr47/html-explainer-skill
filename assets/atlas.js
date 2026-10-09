@@ -12,7 +12,8 @@
            (write </script in a snippet as <\/script)
    Trace   <ol class="trace" id="upload" data-lanes="browser,api,db"><li data-lane="api">One-line label</li>..</ol>
    Matrix  <table class="matrix"><caption>..</caption>.. <td class="go|wait|stop">..</td></table>
-   Search  <input type="search" class="atlas-search" aria-label="Search"> inside the rail's .tools
+   Search  <input type="search" class="atlas-search" aria-label="Search"> inside the rail's .tools; it finds headings,
+           rail labels, glossary terms and map nodes first, then any paragraph, list item, table cell or caption
    Link    #<chapter-id>/<node-or-trace-id>, written on select and restored on load. */
 (() => {
   'use strict';
@@ -155,18 +156,24 @@
     if (a && inspect(a)) e.preventDefault();
   });
 
-  /* ---------- rail search: h2, h3, glossary terms and map nodes ---------- */
+  /* ---------- rail search: headings, rail labels, glossary terms and map nodes first, then the body text ---------- */
   const box = d.querySelector('input.atlas-search');
   if (box) {
     const out = d.createElement('output'), index = [], text = el => el.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+    const add = (el, rank) => { if (!el.closest('.node-detail')) index.push({ el, rank, text: text(el) }); };
     let hits = [];
     box.after(out);
-    all('main h2, main h3, main .term dt').forEach(el => { if (!el.closest('.node-detail')) index.push({ el, text: text(el) }); });
-    nodes.forEach(n => index.push({ el: n.el, node: n, text: n.id.toLowerCase() + ' ' + text(n.el) }));
+    all('main h2, main h3, main .term dt').forEach(el => add(el, 0));
+    all('.rail ol > li > a[href^="#"]').forEach(a => {  // the rail's short labels name a chapter in words its heading may not use
+      const c = d.getElementById(a.getAttribute('href').slice(1));
+      if (c) index.push({ el: c, rank: 0, text: text(a) });
+    });
+    nodes.forEach(n => index.push({ el: n.el, node: n, rank: 0, text: n.id.toLowerCase() + ' ' + text(n.el) }));
+    all('main :is(p, li, td, th, dd, figcaption, summary)').forEach(el => add(el, 1));  // "session", "token": words that live only in prose
     index.sort((a, b) => (a.el.compareDocumentPosition(b.el) & 4 ? -1 : 1));
     const run = () => {
       const q = box.value.trim().toLowerCase(), seen = new Set();
-      hits = q ? index.filter(it => it.text.includes(q)).sort((a, b) => a.text.indexOf(q) - b.text.indexOf(q)) : [];
+      hits = q ? index.filter(it => it.text.includes(q)).sort((a, b) => a.rank - b.rank || a.text.indexOf(q) - b.text.indexOf(q)) : [];
       hits.forEach(h => { const c = chap(h.el); if (c) seen.add(c.id); });
       all('.rail ol > li').forEach(li => {
         const a = li.querySelector('a[href^="#"]');

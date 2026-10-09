@@ -125,6 +125,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
   --font-code: "BIZ UDGothic", "Cascadia Code", Consolas, monospace;
   --measure: 36em;
   line-height: 1.75; letter-spacing: .03em; line-break: strict; hyphens: none;
+  word-break: auto-phrase;  /* break between phrases, so a narrow button never splits ダウン / ロード */
 }
 :lang(ja) h1, :lang(ja) h2, :lang(ja) h3, :lang(ja) h4 { letter-spacing: 0; line-height: 1.35; }
 :lang(ja) em, :lang(ja) i { font-style: normal; font-weight: 700; }
@@ -172,6 +173,13 @@ main { min-width: 0; }
 .keep > strong { display: block; font-family: var(--font-head); font-weight: 600; margin-bottom: .4rem; }
 .keep ol { margin: 0; padding-left: 1.4rem; max-width: none; }
 .keep li { margin: 0 0 .15rem; }
+@media (max-width: 560px) {  /* the answer and all three keep items fit a 390 x 844 phone's first screen */
+  .page { padding-top: 1rem; }
+  .kicker { margin-bottom: .25rem; }
+  .meta { gap: 0 .9rem; font-size: var(--size-xs); margin: .25rem 0 .9rem; }
+  .answer { padding: .75rem 1rem .75rem 1.1rem; font-size: 1.05rem; line-height: 1.3; margin-bottom: .9rem; }
+  .keep { padding: .75rem 1rem; }
+}
 
 /* ---------- 5. Chapter map: the visual table of contents ---------- */
 .map { list-style: none; margin: 0 0 2.5rem; padding: 0; display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: none; counter-reset: map; }
@@ -206,8 +214,20 @@ main { min-width: 0; }
 /* ---------- 7. Figures and diagrams ---------- */
 .figure { margin: 1.25rem 0 1.5rem; padding: 1rem; background: var(--well); border-radius: var(--r-comp); border: 1px solid var(--line); }
 .figure > svg { display: block; width: 100%; height: auto; }
-.figure .take { margin: .9rem 0 0; padding: .5rem .75rem; background: var(--card); border-left: 4px solid var(--here); border-radius: 0 6px 6px 0; font-size: var(--size-s); max-width: none; }
-.figure .take b { font-family: var(--font-head); font-weight: 600; }
+.figure > svg.narrow { display: none; }
+@media (max-width: 560px) {
+  /* An 800-wide diagram scaled to a phone shrinks 13 px labels to 5 px. It keeps 640 px and scrolls
+     sideways instead, with its caption pinned in view; a figure that carries an svg.narrow twin shows that. */
+  .figure { overflow-x: auto; }
+  .figure > svg { min-width: 640px; }
+  .figure > :not(svg) { position: sticky; left: 0; }
+  .figure:has(> svg.narrow) > svg:not(.narrow) { display: none; }
+  .figure > svg.narrow { display: block; min-width: 0; }
+}
+/* the caption that states the conclusion: inside a figure, or straight under any other component */
+.take { margin: .9rem 0 0; padding: .5rem .75rem; background: var(--card); border-left: 4px solid var(--here); border-radius: 0 6px 6px 0; font-size: var(--size-s); max-width: none; }
+.chapter > .take { margin: -.75rem 0 1.5rem; background: var(--well); }
+.take b { font-family: var(--font-head); font-weight: 600; }
 /* svg diagram vocabulary: use these classes on shapes so both themes work */
 .d-box { fill: var(--card); stroke: var(--line-strong); stroke-width: 1.5; }
 .d-box-here { fill: var(--here-tint); stroke: var(--here); stroke-width: 2; }
@@ -303,8 +323,9 @@ main { min-width: 0; }
 .steps > li > b { font-family: var(--font-head); font-weight: 600; }
 
 .tiles { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 1rem 0 1.5rem; }
-.tile { padding: .9rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); }
-.tile .n { display: block; font-family: var(--font-head); font-weight: 700; font-size: var(--size-3); line-height: 1; color: var(--here); }
+.tile { container-type: inline-size; padding: .9rem 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r-comp); }
+/* a number never breaks inside itself ("$24,00" / "0+"); it shrinks to fit its tile instead */
+.tile .n { display: block; font-family: var(--font-head); font-weight: 700; font-size: var(--size-3); font-size: min(var(--size-3), 20cqi); line-height: 1; color: var(--here); white-space: nowrap; overflow-wrap: normal; }
 .tile .l { font-size: var(--size-s); color: var(--ink-soft); }
 .tile.go .n { color: var(--go); } .tile.wait .n { color: var(--wait); } .tile.stop .n { color: var(--stop); }
 
@@ -359,6 +380,11 @@ body[data-skim="on"] .chapter ul:not(.status):not(.flow):not(.options):not(.opti
 body[data-skim="on"] .chapter details.fold,
 body[data-skim="on"] .chapter .term,
 body[data-skim="on"] .chapter .from { display: none; }
+/* Skim keeps one picture per chapter, its caption and the remember line. Later pictures, plain callouts
+   and the detail text inside components drop out; measured on twelve pages, skim reading fell by about half. */
+body[data-skim="on"] .chapter :is(.figure, .flow, .split, .timeline, .status, .tiles, .steps, .metaphor, .views, .stepper) ~ :is(.figure, .flow, .split, .timeline, .status, .tiles, .steps, .metaphor, .views, .stepper),
+body[data-skim="on"] .chapter .callout:not(.warn, .stop),
+body[data-skim="on"] .chapter :is(.status li span, .timeline .what, .flow li span, .option li) { display: none; }
 body[data-skim="on"] .chapter .figure,
 body[data-skim="on"] .chapter .remember { display: flex; }
 body[data-skim="on"] .chapter .figure { display: block; }

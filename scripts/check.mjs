@@ -7,7 +7,10 @@ import { readFileSync, statSync } from 'node:fs';
 const file = process.argv[2];
 if (!file) { console.error('usage: node check.mjs <file.html> [--json]'); process.exit(2); }
 const asJson = process.argv.includes('--json');
-const html = readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, ''); // comments never count
+// Comments never count, and neither do script and textarea bodies: an atlas embeds whole source files as
+// <script type="text/plain">, and the <svg> icons and class names inside them are code to read, not page markup.
+// The tags themselves stay, so the external-script rule still sees every src.
+const html = readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/(<(script|textarea)\b[^>]*>)[\s\S]*?(<\/\2\s*>)/gi, '$1$3');
 const fails = [], warns = [], info = {};
 const fail = (m) => fails.push(m), warn = (m) => warns.push(m);
 
@@ -117,6 +120,7 @@ chapters.forEach(([, id, body], i) => {
   if (!hasClass('p', 'remember').test(body)) fail(`chapter #${id} has no p.remember`);
   if (i > 0 && !hasClass('p', 'from').test(body)) warn(`chapter #${id} has no p.from carry-forward`);
   if (!visual.test(body)) fail(`chapter #${id} has no visual component`);
+  if (type !== 'atlas' && !/class="(?:[^"]*\s)?take(?:\s[^"]*)?"/.test(body)) warn(`chapter #${id} has no .take; under its picture, say in one line what it proves`);
   if (w > LIM.chapter) warn(`chapter #${id} reading path is ${w} ${unit}; aim under ${LIM.chapter}`);
   for (const p of readingPath.matchAll(/<p(?![\w-])(?![^>]*class="(?:answer|take|remember|from|nothing)")[^>]*>([\s\S]*?)<\/p>/g)) {
     const pw = size(p[1]);
@@ -128,9 +132,46 @@ info.readingPathWords = totalWords; info.readingMinutes = Math.ceil(totalWords /
 if (totalWords > LIM.path) warn(`reading path is ${totalWords} ${unit} across chapters; aim under ${LIM.path}`);
 
 // ---- figures and svg
-for (const f of html.matchAll(/<figure class="figure">([\s\S]*?)<\/figure>/g)) {
-  if (!/<svg\b/.test(f[1]) && !/<img\b/.test(f[1])) fail('figure.figure without an svg');
-  if (!hasClass('figcaption', 'take').test(f[1])) fail('figure.figure without figcaption.take');
+const figures = find('figure', 'figure'); // every figure whose class list has "figure": "figure sysmap" and "figure bars" too
+for (const f of figures) {
+  if (!/<(svg|img|canvas|table)\b/i.test(f.inner) && !strip(f.inner.replace(/<figcaption[\s\S]*?<\/figcaption>/gi, ''))) fail('figure.figure holds nothing but its caption');
+  if (!hasClass('figcaption', 'take').test(f.inner)) fail('figure.figure without figcaption.take');
+}
+
+// ---- phone legibility: a diagram's smallest label, rendered on a 375 px phone, must reach 9 px.
+// Page, chapter and figure padding leave a figure's svg 274 px there, so an 800-wide viewBox shrinks 13 px labels
+// to 4.5 px. The template's phone rule gives `.figure > svg` a 640 px minimum and lets the figure scroll, and an
+// svg.narrow twin replaces the wide one; both are read from the page's own CSS, so older pages are judged as they render.
+const PHONE_SVG = 274, MIN_LABEL = 9; // 9 px still reads; the failure this exists for is 4 to 5 px
+const parts = (r) => r.sel.split(',').map((s) => s.trim());
+let figMin = 0; // the min-width a `.figure > svg` rule gives, if any
+for (const r of rules) if (parts(r).some((s) => /figure\s*>\s*svg$/.test(s))) figMin = Math.max(figMin, +(/min-width\s*:\s*(\d+)px/.exec(r.body) || [, 0])[1]);
+const phoneHidden = new Set(); // svg classes a phone-width media rule hides, such as svg.wide
+for (const m of css.matchAll(/@media[^{]*max-width\s*:\s*(\d+)px[^{]*\{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/g)) if (+m[1] <= 600)
+  for (const r of m[2].matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (/display\s*:\s*none/i.test(r[2]))
+    for (const s of r[1].split(',')) { const k = /svg\.([\w-]+)$/.exec(s.trim()); if (k) phoneHidden.add(k[1]); }
+const classPx = {}; // .d-text-s -> 13, from every rule that sets a px font size on a class
+for (const r of rules) { const px = /font-size\s*:\s*([\d.]+)px/i.exec(r.body); if (px) for (const s of parts(r)) { const k = /\.([\w-]+)$/.exec(s); if (k) classPx[k[1]] = +px[1]; } }
+const labelPx = (attrs) => {
+  const own = /(?:^|\s)font-size="([\d.]+)(?:px)?"/.exec(attrs) || /font-size\s*:\s*([\d.]+)px/.exec(attr(attrs, 'style') || '');
+  if (own) return +own[1];
+  const sizes = (attr(attrs, 'class') || '').split(/\s+/).map((c) => classPx[c]).filter(Boolean);
+  return sizes.length ? Math.min(...sizes) : null;
+};
+for (const f of figures) {
+  const svgs = starts(f.inner).filter((m) => m[1].toLowerCase() === 'svg').map((m) => ({ attrs: m[2], body: inner(f.inner, m.index + m[0].length, 'svg') }));
+  const narrow = svgs.some((s) => /\bnarrow\b/.test(attr(s.attrs, 'class') || ''));
+  for (const s of svgs) {
+    const cls = (attr(s.attrs, 'class') || '').split(/\s+/), isNarrow = cls.includes('narrow');
+    if ((narrow && !isNarrow) || cls.some((c) => phoneHidden.has(c))) continue; // hidden on a phone
+    const vb = (attr(s.attrs, 'viewBox') || '').trim().split(/[\s,]+/).map(Number), w = vb[2];
+    const px = starts(s.body).filter((m) => /^(text|tspan)$/i.test(m[1])).map((m) => labelPx(m[2])).filter(Boolean);
+    if (!w || !px.length) continue;
+    const shown = Math.round(Math.min(...px) * (isNarrow ? PHONE_SVG : Math.max(PHONE_SVG, figMin)) / w * 10) / 10;
+    info.smallestPhoneLabel = Math.min(info.smallestPhoneLabel ?? Infinity, shown);
+    const name = strip((/<title\b[^>]*>([\s\S]*?)<\/title>/i.exec(s.body) || [, ''])[1]).slice(0, 40);
+    if (shown < MIN_LABEL) fail(`diagram "${name}": labels render at ${shown} px on a phone (min ${MIN_LABEL}); keep the template's 560px .figure rule, or add an svg.narrow twin`);
+  }
 }
 for (const s of html.matchAll(/<svg\b([^>]*)>([\s\S]*?)<\/svg>/g)) {
   if (!/viewBox=/.test(s[1])) fail('svg without viewBox');

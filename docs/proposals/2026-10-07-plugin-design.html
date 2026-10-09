@@ -207,6 +207,11 @@ main { min-width: 0; }
 /* ---------- 7. Figures and diagrams ---------- */
 .figure { margin: 1.25rem 0 1.5rem; padding: 1rem; background: var(--well); border-radius: var(--r-comp); border: 1px solid var(--line); }
 .figure > svg { display: block; width: 100%; height: auto; }
+@media (max-width: 560px) {  /* 1.1.0: keep diagrams 640 px wide on a phone and scroll them, so labels stay readable */
+  .figure { overflow-x: auto; }
+  .figure > svg { min-width: 640px; }
+  .figure > :not(svg) { position: sticky; left: 0; }
+}
 .figure .take { margin: .9rem 0 0; padding: .5rem .75rem; background: var(--card); border-left: 4px solid var(--here); border-radius: 0 6px 6px 0; font-size: var(--size-s); max-width: none; }
 .figure .take b { font-family: var(--font-head); font-weight: 600; }
 /* svg diagram vocabulary: use these classes on shapes so both themes work */

@@ -58,3 +58,5 @@ One `.html` file from `../../assets/template.html`, in this order:
 - **"As we saw above."** The reader scrolled. Restate it in `p.from`.
 - **Colour as decoration.** Six meaning colours, one meaning each, never colour alone.
 - **A diagram that repeats the paragraph.** Delete the paragraph, write the take-away caption.
+- **A picture with no take line.** A status board or a split proves something too: say what in a `p.take` straight under it.
+- **A diagram drawn only for a wide screen.** Keep the template's figure CSS so it scrolls on a phone, or add an `svg.narrow` twin. The checker fails labels under 9 px on a phone.

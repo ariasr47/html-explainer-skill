@@ -35,7 +35,7 @@ There is no build step. The scripts need Node 18 or newer and use only Node's bu
 
 ### Local plugin packaging
 
-This checkout is the plugin. `.claude-plugin/plugin.json` names it `html-explainer`, sets the version (`1.0.0`) and lists the three skill folders. `.claude-plugin/marketplace.json` makes the repository a one-plugin marketplace named `html-explainer-skill`, with the plugin source at `./`. Change the two files together. A release is a git tag plus the `version` field; nothing else.
+This checkout is the plugin. `.claude-plugin/plugin.json` names it `html-explainer`, sets the version (`1.1.0`) and lists the three skill folders. `.claude-plugin/marketplace.json` makes the repository a one-plugin marketplace named `html-explainer-skill`, with the plugin source at `./`. Change the two files together. A release is a git tag plus the `version` field; nothing else.
 
 Skills reach the template, guides and scripts by paths relative to their own `SKILL.md` (for example `../../assets/template.html`), never through `~/.claude/...` or environment variables. The repository root is both the plugin root and, through the root shim, a standalone skill folder, so one set of files serves both routes.
 
