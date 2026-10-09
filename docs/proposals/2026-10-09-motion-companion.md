@@ -1,6 +1,6 @@
 # Claude Motion as a companion to explainer pages
 
-Proposal, 2026-10-09. Status: for Rodrigo's decision. Nothing built.
+Proposal, 2026-10-09. Status: backlog, decided by Rodrigo on 2026-10-09. Revisit when Claude Motion gets a Claude Code hook or an API, or reaches the plans in use. Nothing built.
 
 ## What Claude Motion is (as reported on 8 and 9 October 2026)
 
