@@ -89,7 +89,7 @@
 /* ---------- 2. Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { font-size: 18px; -webkit-text-size-adjust: 100%; }
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* No smooth scrolling: the animation stalls inside embedded browser panes, so rail clicks looked dead. Jumps are instant on purpose. */
 body {
   margin: 0; background: var(--paper); color: var(--ink);
   font-family: var(--font-body); font-size: var(--size-0); line-height: 1.6;
